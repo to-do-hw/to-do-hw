@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חדר תלמיד אישי</title>
+    <style>
+        :root { --primary: #6366f1; --bg: #f3f4f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; width: 100%; max-width: 450px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: var(--primary); }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 16px; text-align: center; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .task-box { border: 1px solid #eee; padding: 15px; border-radius: 15px; margin: 10px 0; display: flex; align-items: center; justify-content: space-between; }
+        .task-box.done { background: #f0fdf4; border-color: #bbf7d0; }
+        .user-info { background: #e0e7ff; padding: 10px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; }
+        input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; accent-color: #10b981; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="login">
+        <h2>כניסה לחדר למידה</h2>
+        <input type="text" id="nameInput" placeholder="מה השם שלך?">
+        <input type="text" id="codeInput" placeholder="קוד כיתה">
+        <button onclick="connect()">היכנס לחדר שלי</button>
+    </div>
+
+    <div id="main" style="display:none;">
+        <div class="user-info">שלום, <span id="userName"></span> 👋</div>
+        <div id="tasks">טוען משימות...</div>
+        <button style="background:#ef4444;" onclick="location.reload()">התנתק</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, query, where, onSnapshot, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
+        authDomain: "tast-7808e.firebaseapp.com",
+        projectId: "tast-7808e",
+        storageBucket: "tast-7808e.firebasestorage.app",
+        messagingSenderId: "99024860024",
+        appId: "1:99024860024:web:24ab70c10254a2014fce8d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let studentName = "";
+    let classCode = "";
+
+    window.connect = () => {
+        studentName = document.getElementById('nameInput').value.trim();
+        classCode = document.getElementById('codeInput').value.toUpperCase().trim();
+        if(!studentName || !classCode) return alert("מלא שם וקוד");
+
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('main').style.display = 'block';
+        document.getElementById('userName').innerText = studentName;
+
+        syncTasks();
+    };
+
+    function syncTasks() {
+        const q = query(collection(db, "tasks"), where("classCode", "==", classCode));
+        onSnapshot(q, async (snap) => {
+            const list = document.getElementById('tasks');
+            list.innerHTML = '';
+            
+            for (const d of snap.docs) {
+                const task = d.data();
+                const taskId = d.id;
+                
+                // בדיקה בבסיס הנתונים אם התלמיד הזה כבר סיים את המשימה הזו
+                const statusId = `${taskId}_${studentName}`;
+                const statusDoc = await getDoc(doc(db, "submissions", statusId));
+                const isDone = statusDoc.exists() ? statusDoc.data().completed : false;
+
+                const div = document.createElement('div');
+                div.className = `task-box ${isDone ? 'done' : ''}`;
+                div.innerHTML = `
+                    <div><strong>${task.title}</strong></div>
+                    <input type="checkbox" ${isDone ? 'checked' : ''} 
+                           onchange="toggleTask('${taskId}', ${isDone})">
+                `;
+                list.appendChild(div);
+            }
+        });
+    }
+
+    window.toggleTask = async (taskId, currentStatus) => {
+        const statusId = `${taskId}_${studentName}`;
+        await setDoc(doc(db, "submissions", statusId), {
+            taskId,
+            studentName,
+            classCode,
+            completed: !currentStatus
+        });
+    };
+</script>
+</body>
+</html>
