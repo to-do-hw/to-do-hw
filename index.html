@@ -2,16 +2,19 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- הגדרות אפליקציית רשת (PWA) -->
+    <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="המשימות שלי">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1e1b4b">
     
-    <title>ניהול משימות ראלי מטו"ס- תלמידים</title>
+    <!-- Manifest Link (Inline Data URL for PWA support) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלי","short_name":"משימות","start_url":".","display":"standalone","background_color":"#1e1b4b","theme_color":"#1e1b4b","orientation":"portrait"}'>
+
+    <title>ממשק תלמיד - המשימות שלי</title>
     <style>
         :root { 
             --primary: #6366f1; 
@@ -31,6 +34,7 @@
             min-height: 100vh;
             color: #1e293b;
             overscroll-behavior-y: contain;
+            padding-top: calc(20px + env(safe-area-inset-top));
         }
         .card { 
             background: var(--card-bg); 
@@ -40,11 +44,10 @@
             margin: auto; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
             backdrop-filter: blur(10px);
-            margin-top: env(safe-area-inset-top, 20px);
         }
         h2, h3 { color: #1e1b4b; margin-top: 0; }
         input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
-        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; -webkit-appearance: none; }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
         
         .task-card { 
@@ -79,7 +82,6 @@
         .check-container:hover { background: #f1f5f9; }
         .check-container input { width: 24px; height: 24px; cursor: pointer; margin: 0; }
         
-        /* Loading Overlay */
         #loadingOverlay {
             display: none;
             text-align: center;
@@ -105,7 +107,6 @@
 <div id="imgModal" onclick="this.style.display='none'"><img id="modalImg"></div>
 
 <div class="card">
-    <!-- מסך כניסה -->
     <div id="loginArea">
         <h2>👋 שלום תלמיד/ה</h2>
         <p style="font-size: 14px; color: #64748b;">הזן את הפרטים כדי לראות את המשימות שלך</p>
@@ -114,13 +115,11 @@
         <button id="loginBtn" onclick="enterClass()">היכנס לשיעור</button>
     </div>
 
-    <!-- מסך טעינה אוטומטית -->
     <div id="loadingOverlay">
         <div class="spinner"></div>
         <p>מתחבר לשיעור באופן אוטומטי...</p>
     </div>
 
-    <!-- מסך משימות -->
     <div id="taskArea" style="display:none;">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3 style="margin:0;">שלום, <span id="helloName" style="color:var(--primary);"></span> ✨</h3>
@@ -148,20 +147,17 @@
     let student = "";
     let classCode = "";
 
-    // טעינת נתונים שמורים וכניסה אוטומטית
     window.onload = async () => {
         const savedName = localStorage.getItem('studentName');
         const savedCode = localStorage.getItem('classCode');
         
         if (savedName && savedCode) {
-            // אם יש נתונים, נציג מסך טעינה וננסה להיכנס
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('loadingOverlay').style.display = 'block';
             
             document.getElementById('studentName').value = savedName;
             document.getElementById('classCode').value = savedCode;
             
-            // השהיה קלה לחווית משתמש טובה יותר
             setTimeout(() => {
                 enterClass(true);
             }, 500);
@@ -188,7 +184,6 @@
                 return;
             }
 
-            // שמירה מקומית להבא
             localStorage.setItem('studentName', student);
             localStorage.setItem('classCode', classCode);
 
@@ -263,9 +258,9 @@
                         if(cb) cb.checked = false;
                         if(card) card.classList.remove('completed');
                     }
-                });
+                }, (error) => console.error("Error loading submission:", error));
             });
-        });
+        }, (error) => console.error("Error loading tasks:", error));
     }
 
     window.toggleTask = async (id) => {
@@ -286,4 +281,3 @@
 </script>
 </body>
 </html>
-
