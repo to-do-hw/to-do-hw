@@ -15,7 +15,7 @@
         }
 
         body {
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             margin: 0; padding: 15px; direction: rtl;
             min-height: 100vh;
             display: flex; justify-content: center;
@@ -24,40 +24,50 @@
             color: var(--text-white);
         }
 
+        /* אנימציית הופעה חלקה */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .main-container {
             width: 100%; max-width: 500px;
             background: var(--glass);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 35px;
             padding: 25px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            animation: fadeIn 0.8s ease-out;
         }
 
-        /* הגדלת טקסטים כללית */
         h2 { font-size: 32px; font-weight: 900; text-align: center; margin-bottom: 25px; }
         
         input {
             width: 100%; padding: 20px; margin-bottom: 15px;
-            background: rgba(255, 255, 255, 0.25); border: none;
+            background: rgba(255, 255, 255, 0.25); border: 2px solid transparent;
             border-radius: 20px; color: white; font-size: 18px; font-weight: 600;
-            box-sizing: border-box;
+            box-sizing: border-box; transition: 0.3s;
         }
+
+        input:focus { border-color: white; outline: none; background: rgba(255, 255, 255, 0.35); }
 
         button.login-btn {
             width: 100%; padding: 20px; border-radius: 20px; border: none;
             background: white; color: #4338ca; font-weight: 900; font-size: 20px; cursor: pointer;
+            transition: transform 0.2s;
         }
+        button.login-btn:active { transform: scale(0.95); }
 
-        /* משימות פעילות - גדולות וברורות */
+        /* משימה פעילה */
         .task-card {
             background: rgba(255, 255, 255, 0.2);
             border: 2px solid var(--glass-border);
-            border-radius: 25px; padding: 20px; margin-bottom: 20px;
+            border-radius: 25px; padding: 22px; margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-out forwards;
         }
 
-        .task-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .task-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
         .task-date { font-size: 15px; color: #a7f3d0; font-weight: 700; margin-bottom: 15px; }
 
         .status-btn {
@@ -65,46 +75,36 @@
             padding: 18px; border-radius: 20px;
             background: rgba(255, 255, 255, 0.15); cursor: pointer;
             font-weight: 800; font-size: 18px; border: 1px solid var(--glass-border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .status-btn.completed { background: var(--accent); color: white; }
+        .status-btn:active { transform: scale(0.9); }
 
-        .task-img { width: 100%; border-radius: 20px; margin-bottom: 15px; }
-
-        /* ארכיון - ריבועים קטנים ללא תמונה */
+        /* ארכיון בריבועים */
         .archive-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* שניים בשורה */
-            gap: 12px;
-            margin-top: 15px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px;
         }
 
         .archive-card {
             background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 18px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            text-align: center;
-            opacity: 0.8;
+            border-radius: 18px; padding: 15px; text-align: center;
+            animation: fadeIn 0.4s ease-out;
         }
 
-        .archive-card .task-title { font-size: 14px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .archive-card .task-title { font-size: 16px; margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; }
         
-        .archive-restore-btn {
-            font-size: 12px; font-weight: 700; background: var(--accent);
-            padding: 6px; border-radius: 8px; cursor: pointer;
+        .restore-link {
+            font-size: 12px; color: var(--accent); font-weight: 800; text-decoration: underline; cursor: pointer;
         }
 
         .section-tag {
-            font-size: 14px; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 1.5px; margin: 35px 0 15px; display: flex; align-items: center; gap: 10px;
+            font-size: 14px; font-weight: 800; margin: 35px 0 15px; display: flex; align-items: center; gap: 10px;
         }
         .section-tag::after { content: ""; flex: 1; height: 1px; background: var(--glass-border); }
 
+        .task-img { width: 100%; border-radius: 20px; margin-bottom: 15px; object-fit: cover; }
         .hidden { display: none; }
+        .logout { font-size: 14px; opacity: 0.7; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -114,20 +114,20 @@
         <h2>המשימות שלי ✨</h2>
         <input type="text" id="studentName" placeholder="שם מלא">
         <input type="text" id="classCode" placeholder="קוד כיתה">
-        <button class="login-btn" onclick="enterClass()">כניסה לדשבורד</button>
+        <button class="login-btn" onclick="enterClass()">התחברות</button>
     </div>
 
     <div id="taskArea" class="hidden">
-        <div style="display:flex; justify-content: space-between; align-items: center;">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <div id="helloName" style="font-size: 26px; font-weight: 900;"></div>
-            <div onclick="location.reload()" style="cursor:pointer; opacity:0.6; font-size: 14px;">התנתק</div>
+            <div class="logout" onclick="logout()">התנתק</div>
         </div>
 
         <div class="section-tag">🚀 משימות לביצוע</div>
         <div id="activeTasks"></div>
 
         <div id="archiveWrapper" class="hidden">
-            <div class="section-tag">✅ ארכיון (ריבועים)</div>
+            <div class="section-tag">✅ ארכיון</div>
             <div id="archivedTasks" class="archive-grid"></div>
         </div>
     </div>
@@ -151,6 +151,17 @@
     let student = "";
     let classCode = "";
 
+    // בדיקה אם יש נתונים שמורים במכשיר
+    window.onload = () => {
+        const savedName = localStorage.getItem('studentName');
+        const savedCode = localStorage.getItem('classCode');
+        if (savedName && savedCode) {
+            document.getElementById('studentName').value = savedName;
+            document.getElementById('classCode').value = savedCode;
+            enterClass(); // כניסה אוטומטית
+        }
+    };
+
     function formatTime(ts) {
         const d = new Date(ts);
         const days = ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"];
@@ -166,6 +177,10 @@
         const snap = await getDocs(q);
         if(snap.empty) { alert("קוד כיתה לא נמצא"); return; }
 
+        // שמירה במכשיר
+        localStorage.setItem('studentName', student);
+        localStorage.setItem('classCode', classCode);
+
         document.getElementById('loginArea').classList.add('hidden');
         document.getElementById('taskArea').classList.remove('hidden');
         document.getElementById('helloName').innerText = "היי " + student;
@@ -175,7 +190,6 @@
     function loadTasks() {
         onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tasksSnap) => {
             onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student), where("classCode", "==", classCode)), (subSnap) => {
-                
                 const doneMap = {};
                 subSnap.forEach(sDoc => { if(sDoc.data().completed) doneMap[sDoc.data().taskId] = true; });
 
@@ -191,18 +205,15 @@
 
                 allTasks.forEach(t => {
                     const isDone = !!doneMap[t.id];
-                    
                     if(isDone) {
-                        // תצוגת ארכיון: ריבועים ללא תמונה
                         archiveDiv.innerHTML += `
                             <div class="archive-card">
                                 <div class="task-title">${t.title}</div>
-                                <div class="archive-restore-btn" onclick="toggleTask('${t.id}', true)">החזר למשימות</div>
+                                <div class="restore-link" onclick="toggleTask('${t.id}', true)">החזר למשימות</div>
                             </div>
                         `;
                         hasArchive = true;
                     } else {
-                        // תצוגה פעילה: גדולה עם תמונה
                         activeDiv.innerHTML += `
                             <div class="task-card">
                                 <div class="task-title">${t.title}</div>
@@ -224,6 +235,11 @@
         await setDoc(doc(db, "submissions", student + "_" + taskId), {
             studentName: student, taskId: taskId, completed: !isDone, classCode: classCode, submittedAt: Date.now()
         });
+    };
+
+    window.logout = () => {
+        localStorage.clear();
+        location.reload();
     };
 </script>
 </body>
