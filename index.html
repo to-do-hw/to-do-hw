@@ -1,222 +1,230 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ניהול משימות ראלי מטו"ס- תלמידים</title>
-<style>
-:root {
---primary: #6366f1;
---accent: #10b981;
---bg: #0f172a;
---card-bg: rgba(30, 41, 59, 0.7);
---border: rgba(255, 255, 255, 0.1);
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ניהול משימות ראלי מטו"ס- תלמידים</title>
+    <style>
+        :root {
+            --primary: #818cf8;
+            --accent: #10b981;
+            --bg-gradient: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+            --glass: rgba(255, 255, 255, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-white: #ffffff;
+        }
 
-* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
+        body {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+            margin: 0; padding: 15px; direction: rtl;
+            min-height: 100vh;
+            display: flex; justify-content: center;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-white);
+        }
 
-body {
-font-family: -apple-system, system-ui, sans-serif;
-margin: 0; padding: 20px; direction: rtl; color: #fff; min-height: 100vh;
-background: radial-gradient(circle at 0% 0%, #4338ca 0%, #0f172a 100%);
-background-attachment: fixed;
-display: flex; justify-content: center;
-}
+        .main-container {
+            width: 100%; max-width: 500px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 35px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
 
-.container { width: 100%; max-width: 450px; }
+        /* הגדלת טקסטים כללית */
+        h2 { font-size: 32px; font-weight: 900; text-align: center; margin-bottom: 25px; }
+        
+        input {
+            width: 100%; padding: 20px; margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.25); border: none;
+            border-radius: 20px; color: white; font-size: 18px; font-weight: 600;
+            box-sizing: border-box;
+        }
 
-/* לוגין משודרג */
-.login-screen {
-background: var(--card-bg); padding: 40px 30px; border-radius: 40px;
-backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-border: 1px solid var(--border); box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-text-align: center; animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
+        button.login-btn {
+            width: 100%; padding: 20px; border-radius: 20px; border: none;
+            background: white; color: #4338ca; font-weight: 900; font-size: 20px; cursor: pointer;
+        }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* משימות פעילות - גדולות וברורות */
+        .task-card {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid var(--glass-border);
+            border-radius: 25px; padding: 20px; margin-bottom: 20px;
+        }
 
-input {
-width: 100%; padding: 18px; border-radius: 18px; border: 1px solid var(--border);
-background: rgba(0,0,0,0.3); color: white; margin-bottom: 15px; font-size: 16px;
-}
+        .task-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .task-date { font-size: 15px; color: #a7f3d0; font-weight: 700; margin-bottom: 15px; }
 
-.btn-primary {
-width: 100%; padding: 18px; border-radius: 18px; border: none;
-background: linear-gradient(135deg, #6366f1, #4f46e5);
-color: white; font-size: 18px; font-weight: 800; cursor: pointer;
-}
+        .status-btn {
+            display: flex; align-items: center; justify-content: center;
+            padding: 18px; border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15); cursor: pointer;
+            font-weight: 800; font-size: 18px; border: 1px solid var(--glass-border);
+        }
 
-/* אנימציה חזקה למשימה */
-.task-card {
-background: rgba(255, 255, 255, 0.06);
-border-radius: 28px; padding: 20px; margin-bottom: 15px;
-border: 1px solid var(--border);
-transition: all 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045);
-}
+        .status-btn.completed { background: var(--accent); color: white; }
 
-.task-card.removing {
-transform: translateX(-150%) rotate(-15deg) scale(0.5);
-opacity: 0; margin-bottom: -100px; /* המשימות מתחת עולות מיד */
-}
+        .task-img { width: 100%; border-radius: 20px; margin-bottom: 15px; }
 
-.task-title { font-size: 20px; font-weight: 800; margin-bottom: 10px; display: block; }
+        /* ארכיון - ריבועים קטנים ללא תמונה */
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* שניים בשורה */
+            gap: 12px;
+            margin-top: 15px;
+        }
 
-.btn-done {
-background: var(--accent); color: white; padding: 15px; border-radius: 15px;
-text-align: center; font-weight: 800; cursor: pointer; margin-top: 15px;
-}
+        .archive-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            opacity: 0.8;
+        }
 
-/* ארכיון אנכי */
-.archive-row {
-background: rgba(0,0,0,0.25); padding: 15px 20px; border-radius: 18px;
-display: flex; justify-content: space-between; align-items: center;
-margin-bottom: 8px; border: 1px solid var(--border);
-animation: popIn 0.4s ease-out;
-}
+        .archive-card .task-title { font-size: 14px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .archive-restore-btn {
+            font-size: 12px; font-weight: 700; background: var(--accent);
+            padding: 6px; border-radius: 8px; cursor: pointer;
+        }
 
-@keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .section-tag {
+            font-size: 14px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.5px; margin: 35px 0 15px; display: flex; align-items: center; gap: 10px;
+        }
+        .section-tag::after { content: ""; flex: 1; height: 1px; background: var(--glass-border); }
 
-.undo-link { color: #818cf8; font-size: 12px; font-weight: 700; cursor: pointer; }
-
-#imgModal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); justify-content: center; align-items: center; }
-</style>
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
 
-<div id="imgModal" onclick="this.style.display='none'"><img id="modalImg" style="max-width:90%; border-radius:25px;"></div>
-
-<div class="container">
-    <div id="loginArea" class="login-screen">
-        <h1 style="margin:0 0 10px 0;">המשימות שלי</h1>
-        <p style="color:#94a3b8; margin-bottom:30px;">התחברות</p>
+<div class="main-container">
+    <div id="loginArea">
+        <h2>המשימות שלי ✨</h2>
         <input type="text" id="studentName" placeholder="שם מלא">
         <input type="text" id="classCode" placeholder="קוד כיתה">
-        <button class="btn-primary" onclick="enterClass()">כניסה</button>
+        <button class="login-btn" onclick="enterClass()">כניסה לדשבורד</button>
     </div>
 
-    <div id="taskArea" style="display:none;">
-        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:25px;">
-            <h2 id="helloName" style="margin:0;">שלום</h2>
-            <span onclick="logout()" style="opacity:0.5; font-size:12px; cursor:pointer;">התנתקות</span>
+    <div id="taskArea" class="hidden">
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <div id="helloName" style="font-size: 26px; font-weight: 900;"></div>
+            <div onclick="location.reload()" style="cursor:pointer; opacity:0.6; font-size: 14px;">התנתק</div>
         </div>
-        
-        <p style="font-weight:800; color:#818cf8; font-size:14px; margin-bottom:15px;">🚀משימות </p>
+
+        <div class="section-tag">🚀 משימות לביצוע</div>
         <div id="activeTasks"></div>
-        
-        <p style="font-weight:800; color:#818cf8; font-size:14px; margin:35px 0 15px 0;">📂 ארכיון משימות</p>
-        <div id="archivedTasks"></div>
+
+        <div id="archiveWrapper" class="hidden">
+            <div class="section-tag">✅ ארכיון (ריבועים)</div>
+            <div id="archivedTasks" class="archive-grid"></div>
+        </div>
     </div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, query, where, onSnapshot, setDoc, doc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, query, where, onSnapshot, setDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
-    authDomain: "tast-7808e.firebaseapp.com",
-    projectId: "tast-7808e",
-    storageBucket: "tast-7808e.firebasestorage.app",
-    messagingSenderId: "99024860024",
-    appId: "1:99024860024:web:24ab70c10254a2014fce8d"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
+        authDomain: "tast-7808e.firebaseapp.com",
+        projectId: "tast-7808e",
+        storageBucket: "tast-7808e.firebasestorage.app",
+        messagingSenderId: "99024860024",
+        appId: "1:99024860024:web:24ab70c10254a2014fce8d"
+    };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-let student = "", classCode = "";
-let allTasks = [];
-let completedTasks = new Set();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let student = "";
+    let classCode = "";
 
-window.onload = () => {
-    const sn = localStorage.getItem('studentName'), cc = localStorage.getItem('classCode');
-    if(sn && cc) { 
-        document.getElementById('studentName').value = sn; 
-        document.getElementById('classCode').value = cc; 
-        enterClass(); 
+    function formatTime(ts) {
+        const d = new Date(ts);
+        const days = ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"];
+        return `יום ${days[d.getDay()]}, ${d.toLocaleDateString('he-IL')} | ${d.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'})}`;
     }
-};
 
-window.enterClass = async () => {
-    student = document.getElementById('studentName').value.trim();
-    classCode = document.getElementById('classCode').value.trim().toUpperCase();
-    if(!student || !classCode) return;
-    localStorage.setItem('studentName', student);
-    localStorage.setItem('classCode', classCode);
-    
-    document.getElementById('helloName').innerText = "היי, " + student;
-    document.getElementById('loginArea').style.display = 'none';
-    document.getElementById('taskArea').style.display = 'block';
+    window.enterClass = async () => {
+        student = document.getElementById('studentName').value.trim();
+        classCode = document.getElementById('classCode').value.trim().toUpperCase();
+        if(!student || !classCode) return;
 
-    // שלב 1: מאזין בזמן אמת למשימות הכיתה (לא דורש ריפרש)
-    onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (snap) => {
-        allTasks = [];
-        snap.forEach(d => allTasks.push({id: d.id, ...d.data()}));
-        allTasks.sort((a,b) => a.endTime - b.endTime);
-        refreshUI();
-    });
+        const q = query(collection(db, "classes"), where("code", "==", classCode));
+        const snap = await getDocs(q);
+        if(snap.empty) { alert("קוד כיתה לא נמצא"); return; }
 
-    // שלב 2: מאזין בזמן אמת לסטטוס הביצוע של התלמיד
-    onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student), where("classCode", "==", classCode)), (snap) => {
-        completedTasks.clear();
-        snap.forEach(d => { if(d.data().completed) completedTasks.add(d.data().taskId); });
-        refreshUI();
-    });
-};
+        document.getElementById('loginArea').classList.add('hidden');
+        document.getElementById('taskArea').classList.remove('hidden');
+        document.getElementById('helloName').innerText = "היי " + student;
+        loadTasks();
+    };
 
-function refreshUI() {
-    const activeContainer = document.getElementById('activeTasks');
-    const archiveContainer = document.getElementById('archivedTasks');
-    
-    let activeHtml = "";
-    let archiveHtml = "";
+    function loadTasks() {
+        onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tasksSnap) => {
+            onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student), where("classCode", "==", classCode)), (subSnap) => {
+                
+                const doneMap = {};
+                subSnap.forEach(sDoc => { if(sDoc.data().completed) doneMap[sDoc.data().taskId] = true; });
 
-    allTasks.forEach(t => {
-        const isDone = completedTasks.has(t.id);
-        if (!isDone) {
-            activeHtml += `
-                <div class="task-card" id="task_${t.id}">
-                    <span class="task-title">${t.title}</span>
-                    <div style="font-size:12px; opacity:0.6; margin-bottom:15px;">🕒 מועד הגשה קרוב</div>
-                    ${t.imageUrl ? `<img src="${t.imageUrl}" style="width:100%; border-radius:18px; margin-bottom:15px;" onclick="zoom('${t.imageUrl}')">` : ''}
-                    <div class="btn-done" onclick="toggleTask('${t.id}', true)">סיימתי את המשימה</div>
-                </div>
-            `;
-        } else {
-            archiveHtml += `
-                <div class="archive-row">
-                    <span>${t.title}</span>
-                    <span class="undo-link" onclick="toggleTask('${t.id}', false)">החזר למעלה</span>
-                </div>
-            `;
-        }
-    });
+                const activeDiv = document.getElementById('activeTasks');
+                const archiveDiv = document.getElementById('archivedTasks');
+                activeDiv.innerHTML = ''; archiveDiv.innerHTML = '';
+                
+                let allTasks = [];
+                tasksSnap.forEach(tDoc => { allTasks.push({ id: tDoc.id, ...tDoc.data() }); });
+                allTasks.sort((a, b) => a.endTime - b.endTime);
 
-    activeContainer.innerHTML = activeHtml;
-    archiveContainer.innerHTML = archiveHtml;
-}
+                let hasArchive = false;
 
-window.toggleTask = async (id, status) => {
-    const el = document.getElementById('task_' + id);
-    
-    if (status && el) {
-        // אנימציה מיידית (Optimistic UI) - המשימה נעלמת עכשיו!
-        el.classList.add('removing');
-        // מחכים לאנימציה שתסתיים ואז מעדכנים בסיס נתונים
-        setTimeout(async () => {
-            await setDoc(doc(db, "submissions", student + "_" + id), {
-                studentName: student, taskId: id, completed: status, classCode: classCode, submittedAt: Date.now()
+                allTasks.forEach(t => {
+                    const isDone = !!doneMap[t.id];
+                    
+                    if(isDone) {
+                        // תצוגת ארכיון: ריבועים ללא תמונה
+                        archiveDiv.innerHTML += `
+                            <div class="archive-card">
+                                <div class="task-title">${t.title}</div>
+                                <div class="archive-restore-btn" onclick="toggleTask('${t.id}', true)">החזר למשימות</div>
+                            </div>
+                        `;
+                        hasArchive = true;
+                    } else {
+                        // תצוגה פעילה: גדולה עם תמונה
+                        activeDiv.innerHTML += `
+                            <div class="task-card">
+                                <div class="task-title">${t.title}</div>
+                                <div class="task-date">🕒 ${formatTime(t.endTime)}</div>
+                                ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img">` : ''}
+                                <div class="status-btn" onclick="toggleTask('${t.id}', false)">
+                                    ⬜ סמן כבוצע
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                document.getElementById('archiveWrapper').classList.toggle('hidden', !hasArchive);
             });
-        }, 500);
-    } else {
-        // במקרה של החזרה מהארכיון - אין צורך לחכות
-        await setDoc(doc(db, "submissions", student + "_" + id), {
-            studentName: student, taskId: id, completed: status, classCode: classCode, submittedAt: Date.now()
         });
     }
-};
 
-window.logout = () => { localStorage.clear(); location.reload(); };
-window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'flex'; };
+    window.toggleTask = async (taskId, isDone) => {
+        await setDoc(doc(db, "submissions", student + "_" + taskId), {
+            studentName: student, taskId: taskId, completed: !isDone, classCode: classCode, submittedAt: Date.now()
+        });
+    };
 </script>
 </body>
 </html>
