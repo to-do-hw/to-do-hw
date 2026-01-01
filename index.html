@@ -9,141 +9,207 @@
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
             --glass: rgba(255, 255, 255, 0.12);
             --glass-border: rgba(255, 255, 255, 0.25);
+            --text-white: #ffffff;
             --accent: #10b981;
-            --date-color: #fcd34d;
+            --danger: #ef4444;
+            --sun-color: #fbbf24; --mon-color: #f87171; --tue-color: #34d399; --wed-color: #60a5fa; --thu-color: #c084fc;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             margin: 0; padding: 15px; direction: rtl;
-            min-height: 100vh; background: var(--bg-gradient);
-            background-attachment: fixed; color: white;
-            display: flex; justify-content: center;
+            min-height: 100vh; display: flex; justify-content: center;
+            background: var(--bg-gradient); background-attachment: fixed; color: var(--text-white);
+            overflow-x: hidden;
         }
 
-        .main-container { width: 100%; max-width: 500px; padding-bottom: 50px; }
+        .main-container { width: 100%; max-width: 500px; }
 
-        .glass-card {
-            background: var(--glass); backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border);
-            border-radius: 30px; padding: 25px; margin-bottom: 20px;
+        /* אנימציות כניסה */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* מערכת שעות מתקפלת */
-        .schedule-toggle-btn {
-            width: 100%; padding: 15px; background: rgba(255,255,255,0.15);
-            border: 2px solid var(--glass-border); border-radius: 20px;
-            color: white; font-weight: bold; cursor: pointer; margin: 15px 0;
-            display: flex; justify-content: center; align-items: center; gap: 10px;
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
-        .schedule-grid {
-            display: none; grid-template-columns: repeat(5, 1fr);
-            gap: 8px; margin-top: 15px; background: rgba(0,0,0,0.3);
-            padding: 10px; border-radius: 20px;
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
         }
 
-        .day-column { display: flex; flex-direction: column; gap: 6px; }
-        .day-label { font-size: 16px; font-weight: 900; color: var(--accent); text-align: center; margin-bottom: 5px; }
-        .subject-dot {
-            height: 45px; border-radius: 10px; background: rgba(255,255,255,0.1);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: bold; text-align: center; padding: 4px;
+        .glass-panel {
+            background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border); border-radius: 35px; padding: 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: scaleIn 0.5s ease-out;
         }
 
-        /* כרטיס משימה */
+        input {
+            width: 100%; padding: 20px; margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.15); border: 2px solid transparent;
+            border-radius: 20px; color: white; font-size: 18px; box-sizing: border-box; outline: none;
+            transition: 0.3s;
+        }
+        input:focus { background: rgba(255, 255, 255, 0.25); border-color: var(--accent); }
+
+        .login-btn {
+            width: 100%; padding: 20px; border-radius: 20px; border: none;
+            background: #fff; color: #1e3a8a; font-weight: 900; font-size: 20px; cursor: pointer;
+            transition: 0.3s active;
+        }
+        .login-btn:active { transform: scale(0.95); }
+
+        /* כפתור מערכת שעות עם פעימה */
+        .schedule-btn-ui {
+            background: rgba(255,255,255,0.2); border: 1px solid var(--glass-border); 
+            padding: 10px 18px; border-radius: 15px; cursor: pointer; 
+            font-weight: bold; font-size: 14px; color: white;
+            animation: pulse 2s infinite; transition: 0.3s;
+        }
+        .schedule-btn-ui:hover { background: rgba(255,255,255,0.3); }
+
+        /* משימות */
         .task-card {
-            background: rgba(255, 255, 255, 0.18); border-radius: 30px;
-            padding: 25px; margin-bottom: 20px; position: relative;
-            border: 1px solid var(--glass-border);
+            position: relative; background: rgba(255, 255, 255, 0.18);
+            border: 1px solid var(--glass-border); border-radius: 25px;
+            padding: 22px; margin-bottom: 20px;
+            animation: fadeInUp 0.5s ease-out backwards;
+            transition: transform 0.3s;
         }
-        .task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; }
-        .task-due-date { font-size: 14px; color: var(--date-color); font-weight: bold; margin-bottom: 12px; }
-        .task-img { width: 100%; border-radius: 20px; margin-top: 10px; cursor: pointer; }
+        .task-card:hover { transform: translateY(-5px); }
 
-        .status-btn {
-            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border);
-            padding: 16px; border-radius: 20px; text-align: center; 
-            cursor: pointer; font-weight: 900; margin-top: 15px; transition: 0.3s;
-        }
-        .status-btn.done { background: var(--accent); color: white; }
+        .task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; margin-left: 80px; }
+        .task-date { font-size: 15px; color: #a7f3d0; font-weight: 700; margin-bottom: 15px; display: block; }
+        .task-img { width: 100%; border-radius: 18px; margin-bottom: 15px; cursor: zoom-in; transition: 0.3s; }
+        .task-img:hover { opacity: 0.9; }
 
-        .ws-tools { position: absolute; top: 15px; left: 15px; }
-        .ws-icon-btn {
-            background: rgba(255, 255, 255, 0.25); width: 45px; height: 45px;
-            border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; border: 1px solid var(--glass-border); font-size: 22px;
+        .status-btn { 
+            padding: 18px; border-radius: 20px; background: rgba(255, 255, 255, 0.1); 
+            text-align: center; font-weight: 800; cursor: pointer; border: 1px solid var(--glass-border);
+            transition: 0.3s;
+        }
+        .status-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .ws-controls { position: absolute; top: 15px; left: 15px; display: flex; gap: 8px; z-index: 10; }
+        .ws-btn { background: rgba(255, 255, 255, 0.15); border: 1px solid var(--glass-border); color: white; width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+        .ws-btn:hover { transform: scale(1.1); background: rgba(255,255,255,0.25); }
+
+        /* חלונות מודאליים */
+        .modal {
+            display: none; position: fixed; inset: 0; z-index: 2000;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px);
+            overflow-y: auto; padding: 30px 15px; cursor: pointer;
+        }
+        .modal-content { 
+            cursor: default; width: 100%; max-width: 450px; margin: 0 auto; 
+            animation: scaleIn 0.3s ease-out;
         }
 
-        /* מודאלים */
-        .promo-overlay {
-            display: none; position: fixed; inset: 0; z-index: 9999;
-            background: rgba(0,0,0,0.88); align-items: center; justify-content: center; padding: 25px;
-        }
-        .promo-content {
+        .day-box { background: rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 15px; margin-bottom: 12px; border-right: 6px solid white; transition: 0.3s; }
+        .day-box:hover { background: rgba(255, 255, 255, 0.12); }
+        .day-box.sun { border-color: var(--sun-color); }
+        .day-box.mon { border-color: var(--mon-color); }
+        .day-box.tue { border-color: var(--tue-color); }
+        .day-box.wed { border-color: var(--wed-color); }
+        .day-box.thu { border-color: var(--thu-color); }
+        .lesson { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .promo-card {
             background: linear-gradient(145deg, #1e40af, #4338ca);
-            padding: 40px; border-radius: 40px; border: 3px solid var(--accent); text-align: center;
+            padding: 35px; border-radius: 40px; border: 2px solid var(--accent); text-align: center;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
         }
-        
-        .zoom-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            z-index: 10000; align-items: center; justify-content: center;
-        }
-        .zoom-overlay img { max-width: 95%; max-height: 90%; border-radius: 20px; }
 
         .hidden { display: none; }
-        input { width: 100%; padding: 18px; border-radius: 18px; border: none; margin-bottom: 12px; font-size: 17px; color: black; }
-        .login-btn { width: 100%; padding: 18px; border-radius: 18px; background: var(--accent); color: white; font-weight: 900; font-size: 19px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="promoModal" class="promo-overlay">
-    <div class="promo-content">
-        <div style="font-size: 50px; margin-bottom: 15px;">📄✨</div>
-        <h2 style="margin:0;">חדש במערכת!</h2>
-        <p style="font-size: 18px; line-height: 1.6; margin: 20px 0;">
-            מהיום ניתן להעלות <b>דפי עבודה</b> (עד 10 תמונות) ישירות לכל משימה בלחיצה על האייקון 📄.
-        </p>
-        <button onclick="closePromo()" style="background:var(--accent); color:white; border:none; padding:15px 40px; border-radius:18px; font-weight:bold; cursor:pointer;">הבנתי!</button>
+<div id="promoModal" class="modal" style="display: none; align-items: center; justify-content: center;">
+    <div class="modal-content promo-card">
+        <div style="font-size: 60px; margin-bottom: 10px;">📄✨</div>
+        <h2 style="margin-top:0;">חדש במערכת!</h2>
+        <p style="line-height: 1.8; font-size: 18px;">מעכשיו תוכלו להעלות את <b>דפי העבודה</b> שלכם (עד 10 תמונות) ישירות לתוך המשימה בלחיצה על האייקון 📄.</p>
+        <button class="login-btn" onclick="closePromo()" style="margin-top: 20px; background: var(--accent); color: white;">מעולה!</button>
     </div>
+</div>
+
+<div id="scheduleModal" class="modal" onclick="this.style.display='none'">
+    <div class="modal-content" onclick="event.stopPropagation();">
+        <h2 style="text-align:center; margin-bottom:20px;">📅 מערכת שעות ז'8</h2>
+        <div class="day-box sun"><div style="color:var(--sun-color); font-weight:900; margin-bottom:8px;">יום ראשון</div>
+            <div class="lesson"><span>מדעי הרוח</span><span>1</span></div>
+            <div class="lesson"><span>אנגלית</span><span>2</span></div>
+            <div class="lesson"><span>מתמטיקה</span><span>3</span></div>
+            <div class="lesson"><span>מדעי הטבע</span><span>4</span></div>
+        </div>
+        <div class="day-box mon"><div style="color:var(--mon-color); font-weight:900; margin-bottom:8px;">יום שני</div>
+            <div class="lesson"><span>מדעי הטבע</span><span>1</span></div>
+            <div class="lesson"><span>חניכה</span><span>2</span></div>
+            <div class="lesson"><span>לשון</span><span>3</span></div>
+            <div class="lesson"><span>מתמטיקה</span><span>4</span></div>
+        </div>
+        <div class="day-box tue"><div style="color:var(--tue-color); font-weight:900; margin-bottom:8px;">יום שלישי</div>
+            <div class="lesson"><span>מדעי הרוח</span><span>1</span></div>
+            <div class="lesson"><span>מדעי הטבע</span><span>2</span></div>
+            <div class="lesson"><span>חנ"ג</span><span>3</span></div>
+            <div class="lesson"><span>לשון</span><span>4</span></div>
+        </div>
+        <div class="day-box wed"><div style="color:var(--wed-color); font-weight:900; margin-bottom:8px;">יום רביעי</div>
+            <div class="lesson"><span>אנגלית</span><span>1</span></div>
+            <div class="lesson"><span>ערבית</span><span>2</span></div>
+            <div class="lesson"><span>מתמטיקה</span><span>3</span></div>
+            <div class="lesson"><span>חניכה/חנ"ג</span><span>4</span></div>
+        </div>
+        <div class="day-box thu"><div style="color:var(--thu-color); font-weight:900; margin-bottom:8px;">יום חמישי</div>
+            <div class="lesson"><span>מדעי הרוח</span><span>1</span></div>
+            <div class="lesson"><span>ייחוד סניפי</span><span>2</span></div>
+            <div class="lesson"><span>אנגלית</span><span>3</span></div>
+            <div class="lesson"><span>ערבית</span><span>4</span></div>
+        </div>
+        <button class="login-btn" onclick="document.getElementById('scheduleModal').style.display='none'" style="margin-top:15px; font-size:16px; padding:15px;">סגור</button>
+    </div>
+</div>
+
+<div id="imgModal" class="modal" onclick="this.style.display='none'">
+    <div class="modal-content"><img id="modalImg" src="" style="width:100%; border-radius:25px; box-shadow: 0 0 50px rgba(0,0,0,0.5);"></div>
 </div>
 
 <div class="main-container">
-    <div id="loginArea" class="glass-card">
-        <h1 style="text-align:center;">כניסה לתלמיד 👋</h1>
+    <div id="loginArea" class="glass-panel">
+        <h2 style="text-align:center; font-size: 30px;">היי חבר 👋</h2>
+        <p style="text-align:center; opacity:0.8; margin-bottom:30px;">הזן פרטים כדי לראות מה חדש</p>
         <input type="text" id="studentName" placeholder="שם מלא">
         <input type="text" id="classCode" placeholder="קוד כיתה">
-        <button class="login-btn" onclick="login()">התחברות</button>
+        <button class="login-btn" onclick="enterClass()">כניסה למערכת</button>
     </div>
 
-    <div id="dashboard" class="hidden">
-        <div class="glass-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 id="helloMsg" style="margin:0;"></h2>
-                <button onclick="logout()" style="color:#ff4d4d; background:none; border:none; font-weight:bold; cursor:pointer;">התנתק</button>
+    <div id="taskArea" class="hidden">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <div id="helloName" style="font-size: 26px; font-weight: 900;"></div>
+            <div style="text-align:left;">
+                <div style="font-size: 13px; opacity: 0.6; cursor: pointer; margin-bottom: 8px;" onclick="logout()">התנתקות</div>
+                <div class="schedule-btn-ui" onclick="document.getElementById('scheduleModal').style.display='block'">📅 מערכת שעות</div>
             </div>
-            <button class="schedule-toggle-btn" onclick="toggleSchedule()">📅 מערכת שעות ז'8</button>
-            <div class="schedule-grid" id="schedule"></div>
         </div>
 
         <div id="activeTasks"></div>
+        
         <div id="archiveWrapper" class="hidden">
-            <div style="margin: 30px 10px 15px 0; font-weight: bold; opacity: 0.7; border-right: 3px solid var(--accent); padding-right: 10px;">משימות שהוגשו ✅</div>
-            <div id="archiveTasks"></div>
+            <div style="font-size: 14px; opacity: 0.6; margin: 40px 0 15px; font-weight: 800; border-right: 3px solid var(--accent); padding-right: 10px;">משימות שהושלמו ✅</div>
+            <div id="archivedTasks" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
         </div>
     </div>
 </div>
 
-<div id="zoomModal" class="zoom-overlay" onclick="this.style.display='none'">
-    <img id="zoomImg" src="">
-</div>
-
-<input type="file" id="filePicker" multiple accept="image/*" style="display:none;">
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, query, where, onSnapshot, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, query, where, onSnapshot, setDoc, doc, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
@@ -156,118 +222,96 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    let student = "", classCode = "";
 
-    let student = "";
-    let classCode = "";
-    let uploadId = "";
+    window.closePromo = () => { localStorage.setItem('promo_v2_seen', 'true'); document.getElementById('promoModal').style.display = 'none'; };
 
-    window.login = (s, c) => {
-        student = s || document.getElementById('studentName').value.trim();
-        classCode = (c || document.getElementById('classCode').value.trim()).toUpperCase();
-        if(!student || !classCode) return;
-
-        localStorage.setItem('student', student);
-        localStorage.setItem('classCode', classCode);
-        
-        document.getElementById('loginArea').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('helloMsg').innerText = "היי " + student;
-
-        if(!localStorage.getItem('promo_seen_v5')) document.getElementById('promoModal').style.display = 'flex';
-        renderSchedule();
-        sync();
-    };
-
-    window.closePromo = () => { localStorage.setItem('promo_seen_v5', 'true'); document.getElementById('promoModal').style.display = 'none'; };
-
-    window.toggleSchedule = () => {
-        const g = document.getElementById('schedule');
-        g.style.display = (g.style.display === 'none' || g.style.display === '') ? 'grid' : 'none';
-    };
-
-    function renderSchedule() {
-        const days = {
-            'א': ['מדעי הרוח', 'אנגלית', 'מתמטיקה', 'מדעי הטבע'],
-            'ב': ['מדעי הטבע', 'חניכה', 'לשון', 'מתמטיקה'],
-            'ג': ['מדעי הרוח', 'מדעי הטבע', 'חנ"ג', 'לשון'],
-            'ד': ['אנגלית', 'ערבית', 'מתמטיקה', 'חניכה/חנ"ג'],
-            'ה': ['מדעי הרוח', 'ייחוד סניפי', 'אנגלית', 'ערבית']
-        };
-        const cont = document.getElementById('schedule');
-        cont.innerHTML = '';
-        Object.entries(days).forEach(([day, subs]) => {
-            let col = `<div class="day-column"><div class="day-label">${day}'</div>`;
-            subs.forEach(s => col += `<div class="subject-dot">${s}</div>`);
-            cont.innerHTML += col + `</div>`;
-        });
+    function formatFullDate(ts) {
+        const d = new Date(ts);
+        const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+        return `יום ${days[d.getDay()]}, ${d.toLocaleDateString('he-IL')} ב-${d.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'})}`;
     }
 
-    function sync() {
-        // הורדתי את ה-orderBy כדי לוודא שהמשימות יופיעו מיד ללא תקלות
-        const qTasks = query(collection(db, "tasks"), where("classCode", "==", classCode));
-        const qSub = query(collection(db, "submissions"), where("classCode", "==", classCode), where("studentName", "==", student));
+    window.enterClass = async () => {
+        student = document.getElementById('studentName').value.trim();
+        classCode = document.getElementById('classCode').value.trim().toUpperCase();
+        if(!student || !classCode) return;
+        const snap = await getDocs(query(collection(db, "classes"), where("code", "==", classCode)));
+        if(snap.empty) return alert("קוד כיתה שגוי");
+        
+        localStorage.setItem('studentName', student); localStorage.setItem('classCode', classCode);
+        document.getElementById('loginArea').classList.add('hidden');
+        document.getElementById('taskArea').classList.remove('hidden');
+        document.getElementById('helloName').innerText = "היי " + student;
+        
+        if(!localStorage.getItem('promo_v2_seen')) {
+            setTimeout(() => document.getElementById('promoModal').style.display = 'flex', 1000);
+        }
+        loadTasks();
+    };
 
-        onSnapshot(qSub, (subSnap) => {
-            const done = {};
-            subSnap.forEach(d => { if(d.data().completed) done[d.data().taskId] = true; });
-
-            onSnapshot(qTasks, (snap) => {
-                const act = document.getElementById('activeTasks');
-                const arc = document.getElementById('archiveTasks');
-                
-                // יצירת מערך משימות ומיון ידני בקוד (במקום בשרת) כדי למנוע שגיאות אינדקס
-                let tasks = [];
-                snap.forEach(doc => tasks.push({id: doc.id, ...doc.data()}));
-                tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-
+    function loadTasks() {
+        onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tSnap) => {
+            onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student), where("classCode", "==", classCode)), (sSnap) => {
+                const done = {}; sSnap.forEach(d => { if(d.data().completed) done[d.data().taskId] = true; });
+                const act = document.getElementById('activeTasks'), arc = document.getElementById('archivedTasks');
                 act.innerHTML = ''; arc.innerHTML = '';
+                
+                let tasks = []; tSnap.forEach(doc => tasks.push({id: doc.id, ...doc.data()}));
+                tasks.sort((a,b) => a.endTime - b.endTime);
 
-                tasks.forEach(t => {
-                    const isDone = done[t.id];
-                    const dateStr = t.dueDate ? new Date(t.dueDate).toLocaleDateString('he-IL') : 'לא נקבע';
-                    
-                    const html = `
-                        <div class="task-card">
-                            <div class="ws-tools"><div class="ws-icon-btn" onclick="startUpload('${t.id}')">📄</div></div>
-                            <div class="task-title">${t.title}</div>
-                            <div class="task-due-date">📅 להגשה עד: ${dateStr}</div>
-                            ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="zoom('${t.imageUrl}')">` : ''}
-                            <div class="status-btn ${isDone ? 'done' : ''}" onclick="toggleStatus('${t.id}', ${isDone})">
-                                ${isDone ? '✅ הוגש בהצלחה' : '⬜ סמן כבוצע'}
-                            </div>
+                tasks.forEach((t, index) => {
+                    const delay = index * 0.1; // אנימציית מדורגת
+                    if(done[t.id]) {
+                        arc.innerHTML += `<div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:20px; text-align:center; animation: fadeInUp 0.5s ease-out forwards;">
+                            <div style="font-weight:bold; margin-bottom:5px;">${t.title}</div>
+                            <div style="color:var(--accent); cursor:pointer; font-size:12px;" onclick="toggleTask('${t.id}', true)">החזר למשימות</div>
                         </div>`;
-                    if(isDone) arc.innerHTML += html; else act.innerHTML += html;
+                    } else {
+                        const canEdit = !t.worksheets || t.worksheetBy === student;
+                        let wsHtml = `<div class="ws-controls">`;
+                        if(t.worksheets) {
+                            wsHtml += `<div class="ws-btn" onclick="viewWS('${t.id}')">👁️</div>`;
+                            if(canEdit) wsHtml += `<div class="ws-btn" style="background:var(--danger)" onclick="deleteWS('${t.id}')">🗑️</div>`;
+                        } else {
+                            wsHtml += `<div class="ws-btn" onclick="document.getElementById('file_${t.id}').click()">📄+</div>
+                                      <input type="file" id="file_${t.id}" class="hidden" multiple accept="image/*" onchange="uploadWS('${t.id}', this)">`;
+                        }
+                        act.innerHTML += `<div class="task-card" style="animation-delay: ${delay}s">
+                            ${wsHtml}</div>
+                            <div class="task-title">${t.title}</div>
+                            <div class="task-date">🕒 ${t.worksheets ? '📄 דפים הועלו ע"י ' + t.worksheetBy : 'להגשה עד: ' + formatFullDate(t.endTime)}</div>
+                            ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="zoom('${t.imageUrl}')">` : ''}
+                            <div class="status-btn" onclick="toggleTask('${t.id}', false)">⬜ סמן שסיימתי</div></div>`;
+                    }
                 });
                 document.getElementById('archiveWrapper').classList.toggle('hidden', arc.innerHTML === '');
             });
         });
     }
 
-    window.startUpload = (id) => { uploadId = id; document.getElementById('filePicker').click(); };
-
-    document.getElementById('filePicker').onchange = async (e) => {
-        const files = Array.from(e.target.files).slice(0, 10);
-        if(!files.length) return;
-        alert("מעלה " + files.length + " דפים...");
-        const b64 = await Promise.all(files.map(f => new Promise(res => {
-            const r = new FileReader(); r.onload = (ev) => res(ev.target.result); r.readAsDataURL(f);
-        })));
-        await updateDoc(doc(db, "tasks", uploadId), { worksheets: b64, worksheetBy: student });
-        alert("הדפים נשמרו!");
+    window.uploadWS = async (id, input) => {
+        const files = Array.from(input.files); if(files.length > 10) return alert("מקסימום 10 דפים");
+        const b64 = await Promise.all(files.map(f => new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(f); })));
+        await updateDoc(doc(db, "tasks", id), { worksheets: b64, worksheetBy: student });
+        alert("הדפים הועלו בהצלחה!");
     };
 
-    window.toggleStatus = async (tid, isDone) => {
-        await setDoc(doc(db, "submissions", student + "_" + tid), {
-            studentName: student, taskId: tid, completed: !isDone, classCode: classCode
-        });
+    window.viewWS = async (id) => {
+        const snap = await getDocs(collection(db, "tasks"));
+        const t = snap.docs.find(d => d.id === id).data();
+        document.getElementById('wsGrid').innerHTML = t.worksheets.map(img => `<img src="${img}" style="width:100%; border-radius:20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">`).join('');
+        document.getElementById('wsViewModal').style.display = 'block';
     };
 
-    window.zoom = (url) => { document.getElementById('zoomImg').src = url; document.getElementById('zoomModal').style.display = 'flex'; };
+    window.deleteWS = async (id) => { if(confirm("למחוק את הדפים שהעלית?")) await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null }); };
+    window.toggleTask = async (tid, isDone) => { await setDoc(doc(db, "submissions", student + "_" + tid), { studentName: student, taskId: tid, completed: !isDone, classCode: classCode, submittedAt: Date.now() }); };
+    window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'block'; };
     window.logout = () => { localStorage.clear(); location.reload(); };
 
     window.onload = () => {
-        const s = localStorage.getItem('student'), c = localStorage.getItem('classCode');
-        if(s && c) login(s, c);
+        const n = localStorage.getItem('studentName'), c = localStorage.getItem('classCode');
+        if(n && c) { document.getElementById('studentName').value = n; document.getElementById('classCode').value = c; enterClass(); }
     };
 </script>
 </body>
