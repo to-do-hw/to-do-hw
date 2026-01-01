@@ -3,151 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tasks Premium">
-
 <title>ניהול משימות ראלי מטו"ס- תלמידים</title>
 <style>
 :root {
 --primary: #6366f1;
 --accent: #10b981;
---bg-dark: #0f172a;
---glass: rgba(30, 41, 59, 0.7);
+--bg: #0f172a;
+--card-bg: rgba(30, 41, 59, 0.7);
 --border: rgba(255, 255, 255, 0.1);
 }
 
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
 
 body {
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+font-family: -apple-system, system-ui, sans-serif;
 margin: 0; padding: 20px; direction: rtl; color: #fff; min-height: 100vh;
-background: radial-gradient(circle at 0% 0%, #4338ca 0%, #1e1b4b 50%, #0f172a 100%);
+background: radial-gradient(circle at 0% 0%, #4338ca 0%, #0f172a 100%);
 background-attachment: fixed;
 display: flex; justify-content: center;
-overflow-x: hidden;
 }
 
-.container { width: 100%; max-width: 450px; position: relative; }
+.container { width: 100%; max-width: 450px; }
 
-/* --- לוגין יוקרתי --- */
-.login-card {
-background: var(--glass);
-padding: 40px 30px;
-border-radius: 40px;
-backdrop-filter: blur(30px);
--webkit-backdrop-filter: blur(30px);
-border: 1px solid var(--border);
-box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-text-align: center;
-animation: cardEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+/* לוגין משודרג */
+.login-screen {
+background: var(--card-bg); padding: 40px 30px; border-radius: 40px;
+backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+border: 1px solid var(--border); box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+text-align: center; animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-@keyframes cardEntrance {
-from { opacity: 0; transform: scale(0.9) translateY(40px); }
-to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.login-card h1 { font-size: 36px; font-weight: 900; margin-bottom: 10px; background: linear-gradient(to bottom, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
 input {
-width: 100%; padding: 20px; border-radius: 20px; border: 1px solid var(--border);
-background: rgba(0,0,0,0.2); color: white; margin-bottom: 15px; font-size: 16px;
-transition: all 0.3s;
+width: 100%; padding: 18px; border-radius: 18px; border: 1px solid var(--border);
+background: rgba(0,0,0,0.3); color: white; margin-bottom: 15px; font-size: 16px;
 }
-input:focus { border-color: var(--primary); background: rgba(0,0,0,0.4); box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
 
-.btn-main {
-width: 100%; padding: 20px; border-radius: 20px; border: none;
-background: linear-gradient(135deg, #6366f1, #4338ca);
+.btn-primary {
+width: 100%; padding: 18px; border-radius: 18px; border: none;
+background: linear-gradient(135deg, #6366f1, #4f46e5);
 color: white; font-size: 18px; font-weight: 800; cursor: pointer;
-box-shadow: 0 10px 25px rgba(67, 56, 202, 0.4);
-transition: transform 0.2s;
 }
-.btn-main:active { transform: scale(0.96); }
 
-/* --- ממשק משימות --- */
-#taskArea { width: 100%; }
-
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.header h2 { margin: 0; font-size: 24px; font-weight: 800; }
-
-.section-label { font-size: 13px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: block; }
-
-/* אנימציה מטורפת למשימה */
-.task-box {
-background: rgba(255, 255, 255, 0.05);
-border-radius: 28px; padding: 22px; margin-bottom: 18px;
+/* אנימציה חזקה למשימה */
+.task-card {
+background: rgba(255, 255, 255, 0.06);
+border-radius: 28px; padding: 20px; margin-bottom: 15px;
 border: 1px solid var(--border);
-position: relative;
-transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-will-change: transform, opacity;
+transition: all 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045);
 }
 
-.task-box.removing {
-animation: fastFlyOut 0.6s forwards cubic-bezier(0.5, -0.5, 0.1, 1.5);
-pointer-events: none;
-margin-top: -120px; /* גורם להן להישאב למעלה */
-opacity: 0;
+.task-card.removing {
+transform: translateX(-150%) rotate(-15deg) scale(0.5);
+opacity: 0; margin-bottom: -100px; /* המשימות מתחת עולות מיד */
 }
 
-@keyframes fastFlyOut {
-    0% { transform: translateX(0) scale(1); }
-    20% { transform: translateX(20px) scale(1.05); }
-    100% { transform: translateX(-150%) scale(0.5) rotate(-10deg); }
+.task-title { font-size: 20px; font-weight: 800; margin-bottom: 10px; display: block; }
+
+.btn-done {
+background: var(--accent); color: white; padding: 15px; border-radius: 15px;
+text-align: center; font-weight: 800; cursor: pointer; margin-top: 15px;
 }
 
-.task-box h3 { margin: 0 0 8px 0; font-size: 20px; font-weight: 800; }
-.task-meta { font-size: 13px; color: #94a3b8; margin-bottom: 15px; }
-
-.done-btn {
-background: var(--accent); color: white; padding: 16px; border-radius: 18px;
-text-align: center; font-weight: 800; cursor: pointer;
-box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
-}
-
-/* --- ארכיון רשימה אנכית --- */
-.archive-item {
-background: rgba(0,0,0,0.2);
-padding: 14px 20px;
-border-radius: 18px;
+/* ארכיון אנכי */
+.archive-row {
+background: rgba(0,0,0,0.25); padding: 15px 20px; border-radius: 18px;
 display: flex; justify-content: space-between; align-items: center;
-margin-bottom: 10px;
-border: 1px solid var(--border);
-animation: fadeIn 0.5s ease-out;
+margin-bottom: 8px; border: 1px solid var(--border);
+animation: popIn 0.4s ease-out;
 }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-.archive-item span { font-weight: 600; font-size: 15px; }
-.undo-btn { color: #818cf8; font-size: 12px; font-weight: 700; cursor: pointer; }
+@keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-#imgModal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); justify-content: center; align-items: center; }
+.undo-link { color: #818cf8; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+#imgModal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); justify-content: center; align-items: center; }
 </style>
 </head>
 <body>
 
-<div id="imgModal" onclick="this.style.display='none'"><img id="modalImg" style="max-width:90%; border-radius:30px;"></div>
+<div id="imgModal" onclick="this.style.display='none'"><img id="modalImg" style="max-width:90%; border-radius:25px;"></div>
 
 <div class="container">
-    <div id="loginArea" class="login-card">
-        <h1>היי! 👋</h1>
-        <p style="color:#94a3b8; margin-bottom:30px;">התחברו כדי להתחיל לעבוד</p>
+    <div id="loginArea" class="login-screen">
+        <h1 style="margin:0 0 10px 0;">המשימות שלי</h1>
+        <p style="color:#94a3b8; margin-bottom:30px;">התחברות</p>
         <input type="text" id="studentName" placeholder="שם מלא">
-        <input type="text" id="classCode" placeholder="קוד כיתה (למשל A1)">
-        <button class="btn-main" onclick="enterClass()">כניסה למערכת</button>
+        <input type="text" id="classCode" placeholder="קוד כיתה">
+        <button class="btn-primary" onclick="enterClass()">כניסה</button>
     </div>
 
     <div id="taskArea" style="display:none;">
-        <div class="header">
-            <h2 id="helloName">שלום</h2>
-            <span onclick="logout()" style="opacity:0.5; font-size: 12px; font-weight:700; cursor:pointer; border-bottom:1px solid;">התנתקות</span>
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:25px;">
+            <h2 id="helloName" style="margin:0;">שלום</h2>
+            <span onclick="logout()" style="opacity:0.5; font-size:12px; cursor:pointer;">התנתקות</span>
         </div>
         
-        <span class="section-label">🚀 משימות לביצוע</span>
+        <p style="font-weight:800; color:#818cf8; font-size:14px; margin-bottom:15px;">🚀משימות </p>
         <div id="activeTasks"></div>
         
-        <span class="section-label" style="margin-top:40px;">📂ארכיון משימות</span>
+        <p style="font-weight:800; color:#818cf8; font-size:14px; margin:35px 0 15px 0;">📂 ארכיון משימות</p>
         <div id="archivedTasks"></div>
     </div>
 </div>
@@ -168,6 +124,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let student = "", classCode = "";
+let allTasks = [];
+let completedTasks = new Set();
 
 window.onload = () => {
     const sn = localStorage.getItem('studentName'), cc = localStorage.getItem('classCode');
@@ -178,76 +136,86 @@ window.onload = () => {
     }
 };
 
-window.enterClass = () => {
+window.enterClass = async () => {
     student = document.getElementById('studentName').value.trim();
     classCode = document.getElementById('classCode').value.trim().toUpperCase();
     if(!student || !classCode) return;
     localStorage.setItem('studentName', student);
     localStorage.setItem('classCode', classCode);
+    
     document.getElementById('helloName').innerText = "היי, " + student;
     document.getElementById('loginArea').style.display = 'none';
     document.getElementById('taskArea').style.display = 'block';
-    listenToTasks();
+
+    // שלב 1: מאזין בזמן אמת למשימות הכיתה (לא דורש ריפרש)
+    onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (snap) => {
+        allTasks = [];
+        snap.forEach(d => allTasks.push({id: d.id, ...d.data()}));
+        allTasks.sort((a,b) => a.endTime - b.endTime);
+        refreshUI();
+    });
+
+    // שלב 2: מאזין בזמן אמת לסטטוס הביצוע של התלמיד
+    onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student), where("classCode", "==", classCode)), (snap) => {
+        completedTasks.clear();
+        snap.forEach(d => { if(d.data().completed) completedTasks.add(d.data().taskId); });
+        refreshUI();
+    });
 };
 
-window.logout = () => { localStorage.clear(); location.reload(); };
-
-function listenToTasks() {
-    onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), () => updateUI());
-}
-
-async function updateUI() {
+function refreshUI() {
     const activeContainer = document.getElementById('activeTasks');
     const archiveContainer = document.getElementById('archivedTasks');
     
-    const tasksSnap = await getDocs(query(collection(db, "tasks"), where("classCode", "==", classCode)));
-    let tasks = [];
-    tasksSnap.forEach(d => tasks.push({id: d.id, ...d.data()}));
-    tasks.sort((a,b) => a.endTime - b.endTime);
-
     let activeHtml = "";
     let archiveHtml = "";
 
-    for (const t of tasks) {
-        const sDoc = await getDoc(doc(db, "submissions", student + "_" + t.id));
-        const done = sDoc.exists() && sDoc.data().completed;
-
-        if (!done) {
+    allTasks.forEach(t => {
+        const isDone = completedTasks.has(t.id);
+        if (!isDone) {
             activeHtml += `
-                <div class="task-box" id="task_${t.id}">
-                    <h3>${t.title}</h3>
-                    <div class="task-meta">🕒 מועד הגשה קרוב</div>
-                    ${t.imageUrl ? `<img src="${t.imageUrl}" style="width:100%; border-radius:20px; margin-bottom:15px;" onclick="zoom('${t.imageUrl}')">` : ''}
-                    <div class="done-btn" onclick="toggleTask('${t.id}', true)">סימנתי כבוצע</div>
+                <div class="task-card" id="task_${t.id}">
+                    <span class="task-title">${t.title}</span>
+                    <div style="font-size:12px; opacity:0.6; margin-bottom:15px;">🕒 מועד הגשה קרוב</div>
+                    ${t.imageUrl ? `<img src="${t.imageUrl}" style="width:100%; border-radius:18px; margin-bottom:15px;" onclick="zoom('${t.imageUrl}')">` : ''}
+                    <div class="btn-done" onclick="toggleTask('${t.id}', true)">סיימתי את המשימה</div>
                 </div>
             `;
         } else {
             archiveHtml += `
-                <div class="archive-item">
+                <div class="archive-row">
                     <span>${t.title}</span>
-                    <span class="undo-btn" onclick="toggleTask('${t.id}', false)">החזר</span>
+                    <span class="undo-link" onclick="toggleTask('${t.id}', false)">החזר למעלה</span>
                 </div>
             `;
         }
-    }
+    });
+
     activeContainer.innerHTML = activeHtml;
     archiveContainer.innerHTML = archiveHtml;
 }
 
 window.toggleTask = async (id, status) => {
     const el = document.getElementById('task_' + id);
-    if(status && el) {
-        el.classList.add('removing');
-    }
     
-    setTimeout(async () => {
+    if (status && el) {
+        // אנימציה מיידית (Optimistic UI) - המשימה נעלמת עכשיו!
+        el.classList.add('removing');
+        // מחכים לאנימציה שתסתיים ואז מעדכנים בסיס נתונים
+        setTimeout(async () => {
+            await setDoc(doc(db, "submissions", student + "_" + id), {
+                studentName: student, taskId: id, completed: status, classCode: classCode, submittedAt: Date.now()
+            });
+        }, 500);
+    } else {
+        // במקרה של החזרה מהארכיון - אין צורך לחכות
         await setDoc(doc(db, "submissions", student + "_" + id), {
             studentName: student, taskId: id, completed: status, classCode: classCode, submittedAt: Date.now()
         });
-        updateUI();
-    }, status ? 600 : 0);
+    }
 };
 
+window.logout = () => { localStorage.clear(); location.reload(); };
 window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'flex'; };
 </script>
 </body>
