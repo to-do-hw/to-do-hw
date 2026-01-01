@@ -29,7 +29,7 @@
             border-radius: 30px; padding: 25px; margin-bottom: 20px;
         }
 
-        /* מערכת שעות מעוצבת לפי התמונה */
+        /* מערכת שעות מתקפלת */
         .schedule-toggle-btn {
             width: 100%; padding: 15px; background: rgba(255,255,255,0.15);
             border: 2px solid var(--glass-border); border-radius: 20px;
@@ -40,19 +40,18 @@
         .schedule-grid {
             display: none; grid-template-columns: repeat(5, 1fr);
             gap: 8px; margin-top: 15px; background: rgba(0,0,0,0.3);
-            padding: 10px; border-radius: 20px; overflow-x: auto;
+            padding: 10px; border-radius: 20px;
         }
 
-        .day-column { display: flex; flex-direction: column; gap: 6px; min-width: 70px; }
+        .day-column { display: flex; flex-direction: column; gap: 6px; }
         .day-label { font-size: 16px; font-weight: 900; color: var(--accent); text-align: center; margin-bottom: 5px; }
         .subject-dot {
-            height: 50px; border-radius: 10px; background: rgba(255,255,255,0.1);
+            height: 45px; border-radius: 10px; background: rgba(255,255,255,0.1);
             display: flex; align-items: center; justify-content: center;
             font-size: 11px; font-weight: bold; text-align: center; padding: 4px;
-            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* משימות */
+        /* כרטיס משימה */
         .task-card {
             background: rgba(255, 255, 255, 0.18); border-radius: 30px;
             padding: 25px; margin-bottom: 20px; position: relative;
@@ -60,13 +59,12 @@
         }
         .task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; }
         .task-due-date { font-size: 14px; color: var(--date-color); font-weight: bold; margin-bottom: 12px; }
-        
         .task-img { width: 100%; border-radius: 20px; margin-top: 10px; cursor: pointer; }
 
         .status-btn {
             background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border);
             padding: 16px; border-radius: 20px; text-align: center; 
-            cursor: pointer; font-weight: 900; margin-top: 15px;
+            cursor: pointer; font-weight: 900; margin-top: 15px; transition: 0.3s;
         }
         .status-btn.done { background: var(--accent); color: white; }
 
@@ -77,6 +75,7 @@
             cursor: pointer; border: 1px solid var(--glass-border); font-size: 22px;
         }
 
+        /* מודאלים */
         .promo-overlay {
             display: none; position: fixed; inset: 0; z-index: 9999;
             background: rgba(0,0,0,0.88); align-items: center; justify-content: center; padding: 25px;
@@ -93,7 +92,7 @@
         .zoom-overlay img { max-width: 95%; max-height: 90%; border-radius: 20px; }
 
         .hidden { display: none; }
-        input { width: 100%; padding: 18px; border-radius: 18px; border: none; margin-bottom: 12px; font-size: 17px; }
+        input { width: 100%; padding: 18px; border-radius: 18px; border: none; margin-bottom: 12px; font-size: 17px; color: black; }
         .login-btn { width: 100%; padding: 18px; border-radius: 18px; background: var(--accent); color: white; font-weight: 900; font-size: 19px; border: none; cursor: pointer; }
     </style>
 </head>
@@ -130,7 +129,7 @@
 
         <div id="activeTasks"></div>
         <div id="archiveWrapper" class="hidden">
-            <div style="margin: 30px 10px 15px 0; font-weight: bold; opacity: 0.7;">משימות שהוגשו ✅</div>
+            <div style="margin: 30px 10px 15px 0; font-weight: bold; opacity: 0.7; border-right: 3px solid var(--accent); padding-right: 10px;">משימות שהוגשו ✅</div>
             <div id="archiveTasks"></div>
         </div>
     </div>
@@ -144,7 +143,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, query, where, onSnapshot, doc, setDoc, updateDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, query, where, onSnapshot, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
@@ -174,19 +173,18 @@
         document.getElementById('dashboard').classList.remove('hidden');
         document.getElementById('helloMsg').innerText = "היי " + student;
 
-        if(!localStorage.getItem('promo_seen_v4')) document.getElementById('promoModal').style.display = 'flex';
+        if(!localStorage.getItem('promo_seen_v5')) document.getElementById('promoModal').style.display = 'flex';
         renderSchedule();
         sync();
     };
 
-    window.closePromo = () => { localStorage.setItem('promo_seen_v4', 'true'); document.getElementById('promoModal').style.display = 'none'; };
+    window.closePromo = () => { localStorage.setItem('promo_seen_v5', 'true'); document.getElementById('promoModal').style.display = 'none'; };
 
     window.toggleSchedule = () => {
         const g = document.getElementById('schedule');
         g.style.display = (g.style.display === 'none' || g.style.display === '') ? 'grid' : 'none';
     };
 
-    // מערכת שעות לפי התמונה של ז'8
     function renderSchedule() {
         const days = {
             'א': ['מדעי הרוח', 'אנגלית', 'מתמטיקה', 'מדעי הטבע'],
@@ -205,8 +203,8 @@
     }
 
     function sync() {
-        // סידור לפי תאריך הגשה (dueDate)
-        const qTasks = query(collection(db, "tasks"), where("classCode", "==", classCode), orderBy("dueDate", "asc"));
+        // הורדתי את ה-orderBy כדי לוודא שהמשימות יופיעו מיד ללא תקלות
+        const qTasks = query(collection(db, "tasks"), where("classCode", "==", classCode));
         const qSub = query(collection(db, "submissions"), where("classCode", "==", classCode), where("studentName", "==", student));
 
         onSnapshot(qSub, (subSnap) => {
@@ -216,21 +214,25 @@
             onSnapshot(qTasks, (snap) => {
                 const act = document.getElementById('activeTasks');
                 const arc = document.getElementById('archiveTasks');
+                
+                // יצירת מערך משימות ומיון ידני בקוד (במקום בשרת) כדי למנוע שגיאות אינדקס
+                let tasks = [];
+                snap.forEach(doc => tasks.push({id: doc.id, ...doc.data()}));
+                tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
                 act.innerHTML = ''; arc.innerHTML = '';
 
-                snap.forEach(tDoc => {
-                    const t = tDoc.data();
-                    const isDone = done[tDoc.id];
-                    // הצגת תאריך היעד
+                tasks.forEach(t => {
+                    const isDone = done[t.id];
                     const dateStr = t.dueDate ? new Date(t.dueDate).toLocaleDateString('he-IL') : 'לא נקבע';
                     
                     const html = `
                         <div class="task-card">
-                            <div class="ws-tools"><div class="ws-icon-btn" onclick="startUpload('${tDoc.id}')">📄</div></div>
+                            <div class="ws-tools"><div class="ws-icon-btn" onclick="startUpload('${t.id}')">📄</div></div>
                             <div class="task-title">${t.title}</div>
                             <div class="task-due-date">📅 להגשה עד: ${dateStr}</div>
                             ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="zoom('${t.imageUrl}')">` : ''}
-                            <div class="status-btn ${isDone ? 'done' : ''}" onclick="toggleStatus('${tDoc.id}', ${isDone})">
+                            <div class="status-btn ${isDone ? 'done' : ''}" onclick="toggleStatus('${t.id}', ${isDone})">
                                 ${isDone ? '✅ הוגש בהצלחה' : '⬜ סמן כבוצע'}
                             </div>
                         </div>`;
