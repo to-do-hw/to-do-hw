@@ -16,6 +16,7 @@
             --wed-color: #60a5fa;
             --thu-color: #c084fc;
             --accent: #10b981;
+            --danger: #ef4444;
         }
 
         body {
@@ -57,7 +58,6 @@
             background: #fff; color: #1e3a8a; font-weight: 900; font-size: 20px; cursor: pointer;
         }
 
-        /* כרטיס משימה */
         .task-card {
             position: relative;
             background: rgba(255, 255, 255, 0.18); border: 1px solid var(--glass-border);
@@ -65,29 +65,33 @@
             animation: fadeIn 0.4s ease-out;
         }
 
-        /* כפתור הוספת דפים קטן בפינה */
-        .add-pages-btn {
+        /* כפתורי ניהול דפי עבודה */
+        .ws-controls {
             position: absolute;
             top: 15px;
             left: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        .ws-btn {
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid var(--glass-border);
             color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
             cursor: pointer;
-            transition: 0.3s;
-            z-index: 10;
+            transition: 0.2s;
+            font-size: 18px;
         }
-        .add-pages-btn:hover { background: var(--accent); }
-        .add-pages-btn.done { color: var(--accent); border-color: var(--accent); cursor: default; background: rgba(16, 185, 129, 0.1); }
+        .ws-btn:hover { background: var(--accent); }
+        .ws-btn.del:hover { background: var(--danger); }
 
-        .task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; margin-left: 35px; }
+        .task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; margin-left: 80px; }
         .task-date { font-size: 15px; color: #a7f3d0; font-weight: 700; margin-bottom: 15px; display: block; }
         .task-img { width: 100%; border-radius: 18px; margin-bottom: 15px; cursor: zoom-in; object-fit: cover; }
 
@@ -97,7 +101,6 @@
         .archive-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .archive-card { background: rgba(0, 0, 0, 0.3); border-radius: 18px; padding: 15px; text-align: center; font-size: 14px; }
 
-        /* מודאלים */
         .modal {
             display: none; position: fixed; inset: 0; z-index: 2000;
             background: rgba(15, 23, 42, 0.95); overflow-y: auto; padding: 30px 15px;
@@ -105,7 +108,16 @@
         }
         .modal-content { cursor: default; width: 100%; max-width: 450px; margin: 0 auto; }
 
-        /* עיצוב מערכת שעות */
+        /* מודאל צפייה בדפי עבודה */
+        .ws-modal {
+            display: none; position: fixed; inset: 0; z-index: 3000;
+            background: rgba(0,0,0,0.95); overflow-y: auto; padding: 20px;
+            flex-direction: column; align-items: center;
+        }
+        .ws-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 500px; margin-top: 60px; }
+        .ws-grid img { width: 100%; border-radius: 15px; border: 1px solid var(--glass-border); }
+        .close-ws { position: fixed; top: 20px; left: 20px; background: var(--danger); color: white; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; z-index: 3001; }
+
         .day-box { background: rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 15px; margin-bottom: 12px; border-right: 6px solid white; }
         .day-box.sun { border-color: var(--sun-color); }
         .day-box.mon { border-color: var(--mon-color); }
@@ -124,6 +136,11 @@
     </style>
 </head>
 <body>
+
+<div id="wsViewModal" class="ws-modal">
+    <div class="close-ws" onclick="document.getElementById('wsViewModal').style.display='none'">סגור צפייה</div>
+    <div id="wsGrid" class="ws-grid"></div>
+</div>
 
 <div id="scheduleModal" class="modal" onclick="this.style.display='none'">
     <div class="modal-content" onclick="event.stopPropagation();">
@@ -237,11 +254,9 @@
         student = document.getElementById('studentName').value.trim();
         classCode = document.getElementById('classCode').value.trim().toUpperCase();
         if(!student || !classCode) return;
-        
         const q = query(collection(db, "classes"), where("code", "==", classCode));
         const snap = await getDocs(q);
         if(snap.empty) { alert("קוד כיתה לא נמצא"); return; }
-        
         localStorage.setItem('studentName', student);
         localStorage.setItem('classCode', classCode);
         document.getElementById('loginArea').classList.add('hidden');
@@ -255,11 +270,9 @@
             onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student), where("classCode", "==", classCode)), (subSnap) => {
                 const doneMap = {};
                 subSnap.forEach(sDoc => { if(sDoc.data().completed) doneMap[sDoc.data().taskId] = true; });
-                
                 const activeDiv = document.getElementById('activeTasks');
                 const archiveDiv = document.getElementById('archivedTasks');
                 activeDiv.innerHTML = ''; archiveDiv.innerHTML = '';
-                
                 let allTasks = [];
                 tasksSnap.forEach(tDoc => { allTasks.push({ id: tDoc.id, ...tDoc.data() }); });
                 allTasks.sort((a, b) => a.endTime - b.endTime);
@@ -268,23 +281,22 @@
                     if(doneMap[t.id]) {
                         archiveDiv.innerHTML += `<div class="archive-card"><div>${t.title}</div><div style="color:var(--accent); cursor:pointer; margin-top:5px;" onclick="toggleTask('${t.id}', true)">החזר</div></div>`;
                     } else {
-                        // כפתור הוספת דפים קטן
-                        let uploadBtn = "";
+                        const canEdit = !t.worksheets || t.worksheetBy === student;
+                        let wsButtons = `<div class="ws-controls">`;
                         if(t.worksheets) {
-                            uploadBtn = `<div class="add-pages-btn done" title="הועלה ע'י ${t.worksheetBy}">📄</div>`;
+                            wsButtons += `<div class="ws-btn" onclick="viewWS('${t.id}')">👁️</div>`;
+                            if(canEdit) wsButtons += `<div class="ws-btn del" onclick="deleteWS('${t.id}')">🗑️</div>`;
                         } else {
-                            uploadBtn = `
-                            <div class="add-pages-btn" onclick="document.getElementById('fileInput_${t.id}').click()" title="הוספת דפי עבודה">
-                                +
-                                <input type="file" id="fileInput_${t.id}" class="hidden" multiple accept="image/*" onchange="uploadFiles('${t.id}', this)">
-                            </div>`;
+                            wsButtons += `<div class="ws-btn" onclick="document.getElementById('file_${t.id}').click()">+</div>
+                            <input type="file" id="file_${t.id}" class="hidden" multiple accept="image/*" onchange="uploadWS('${t.id}', this)">`;
                         }
+                        wsButtons += `</div>`;
 
                         activeDiv.innerHTML += `
                         <div class="task-card">
-                            ${uploadBtn}
+                            ${wsButtons}
                             <div class="task-title">${t.title}</div>
-                            <div class="task-date">🕒 הגשה עד: ${formatFullDate(t.endTime)}</div>
+                            <div class="task-date">🕒 ${t.worksheets ? '📄 עודכן ע"י ' + t.worksheetBy : 'הגשה עד: ' + formatFullDate(t.endTime)}</div>
                             ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="zoom('${t.imageUrl}')">` : ''}
                             <div class="status-btn" onclick="toggleTask('${t.id}', false )">⬜ סמן כבוצע</div>
                         </div>`;
@@ -295,45 +307,40 @@
         });
     }
 
-    window.uploadFiles = async (taskId, input) => {
-        const files = input.files;
-        if(files.length !== 2) {
-            alert("יש לבחור בדיוק 2 עמודי עבודה");
-            return;
-        }
+    window.uploadWS = async (taskId, input) => {
+        const files = Array.from(input.files);
+        if(files.length === 0 || files.length > 10) return alert("ניתן להעלות בין 1 ל-10 דפים");
+        
+        const promises = files.map(file => new Promise(res => {
+            const r = new FileReader();
+            r.onload = e => res(e.target.result);
+            r.readAsDataURL(file);
+        }));
+        
+        const images = await Promise.all(promises);
+        await updateDoc(doc(db, "tasks", taskId), { worksheets: images, worksheetBy: student });
+        alert("דפי העבודה הועלו לכל הכיתה!");
+    };
 
-        const reader1 = new FileReader();
-        reader1.onload = (e1) => {
-            const reader2 = new FileReader();
-            reader2.onload = async (e2) => {
-                try {
-                    await updateDoc(doc(db, "tasks", taskId), {
-                        worksheets: [e1.target.result, e2.target.result],
-                        worksheetBy: student
-                    });
-                    alert("דפי העבודה עודכנו לכל הכיתה!");
-                } catch (err) { alert("שגיאה: " + err.message); }
-            };
-            reader2.readAsDataURL(files[1]);
-        };
-        reader1.readAsDataURL(files[0]);
+    window.viewWS = async (taskId) => {
+        const snap = await getDocs(query(collection(db, "tasks")));
+        const task = snap.docs.find(d => d.id === taskId).data();
+        const grid = document.getElementById('wsGrid');
+        grid.innerHTML = task.worksheets.map(img => `<img src="${img}">`).join('');
+        document.getElementById('wsViewModal').style.display = 'flex';
+    };
+
+    window.deleteWS = async (taskId) => {
+        if(confirm("למחוק את דפי העבודה שעדכנת?")) {
+            await updateDoc(doc(db, "tasks", taskId), { worksheets: null, worksheetBy: null });
+        }
     };
 
     window.toggleTask = async (taskId, isDone) => {
-        await setDoc(doc(db, "submissions", student + "_" + taskId), { 
-            studentName: student, 
-            taskId: taskId, 
-            completed: !isDone, 
-            classCode: classCode, 
-            submittedAt: Date.now() 
-        });
+        await setDoc(doc(db, "submissions", student + "_" + taskId), { studentName: student, taskId: taskId, completed: !isDone, classCode: classCode, submittedAt: Date.now() });
     };
 
-    window.zoom = (url) => { 
-        document.getElementById('modalImg').src = url; 
-        document.getElementById('imgModal').style.display = 'flex'; 
-    };
-    
+    window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'flex'; };
     window.logout = () => { localStorage.clear(); location.reload(); };
 </script>
 </body>
