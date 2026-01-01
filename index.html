@@ -10,215 +10,167 @@
             --glass: rgba(255, 255, 255, 0.12);
             --glass-border: rgba(255, 255, 255, 0.25);
             --text-white: #ffffff;
+            --accent: #10b981;
             --sun-color: #fbbf24;
             --mon-color: #f87171;
             --tue-color: #34d399;
             --wed-color: #60a5fa;
             --thu-color: #c084fc;
-            --accent: #10b981;
-            --danger: #ef4444;
         }
 
         body {
-            font-family: -apple-system, system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0; padding: 15px; direction: rtl;
-            min-height: 100vh;
+            min-height: 100vh; background: var(--bg-gradient);
+            background-attachment: fixed; color: var(--text-white);
             display: flex; justify-content: center;
-            background: var(--bg-gradient);
-            background-attachment: fixed;
-            color: var(--text-white);
+            -webkit-font-smoothing: antialiased;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .main-container { width: 100%; max-width: 500px; padding-bottom: 50px; }
+
+        .glass-card {
+            background: var(--glass); backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border);
+            border-radius: 30px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        .main-container {
-            width: 100%; max-width: 500px;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border);
-            border-radius: 35px;
-            padding: 25px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-            animation: fadeIn 0.6s ease-out;
+        /* מערכת שעות מלאה */
+        .schedule-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 8px; margin-top: 15px; background: rgba(0,0,0,0.1);
+            padding: 10px; border-radius: 20px;
+        }
+        .day-column { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .day-label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: var(--accent); }
+        .subject-dot {
+            width: 100%; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: bold; text-align: center;
+            padding: 4px; box-sizing: border-box; color: #000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        input {
-            width: 100%; padding: 20px; margin-bottom: 15px;
-            background: rgba(255, 255, 255, 0.15); border: 2px solid transparent;
-            border-radius: 20px; color: white; font-size: 18px; font-weight: 600;
-            box-sizing: border-box; outline: none;
-        }
-
-        button.login-btn {
-            width: 100%; padding: 20px; border-radius: 20px; border: none;
-            background: #fff; color: #1e3a8a; font-weight: 900; font-size: 20px; cursor: pointer;
-        }
-
+        /* משימות */
         .task-card {
-            position: relative;
-            background: rgba(255, 255, 255, 0.18); border: 1px solid var(--glass-border);
-            border-radius: 25px; padding: 22px; margin-bottom: 20px;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        /* כפתורי ניהול דפי עבודה */
-        .ws-controls {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            display: flex;
-            gap: 8px;
-            z-index: 10;
-        }
-        .ws-btn {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.18); border-radius: 28px;
+            padding: 22px; margin-bottom: 18px; position: relative;
             border: 1px solid var(--glass-border);
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 18px;
+            transition: transform 0.2s;
         }
-        .ws-btn:hover { background: var(--accent); }
-        .ws-btn.del:hover { background: var(--danger); }
-
-        .task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; margin-left: 80px; }
-        .task-date { font-size: 15px; color: #a7f3d0; font-weight: 700; margin-bottom: 15px; display: block; }
-        .task-img { width: 100%; border-radius: 18px; margin-bottom: 15px; cursor: zoom-in; object-fit: cover; }
-
-        .status-btn { padding: 18px; border-radius: 20px; background: rgba(255, 255, 255, 0.1); text-align: center; font-weight: 800; cursor: pointer;
-        border: 1px solid var(--glass-border); margin-top: 10px;}
-
-        .archive-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .archive-card { background: rgba(0, 0, 0, 0.3); border-radius: 18px; padding: 15px; text-align: center; font-size: 14px; }
-
-        .modal {
-            display: none; position: fixed; inset: 0; z-index: 2000;
-            background: rgba(15, 23, 42, 0.95); overflow-y: auto; padding: 30px 15px;
-            backdrop-filter: blur(15px); cursor: pointer;
+        .task-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; color: #fff; }
+        .task-img { 
+            width: 100%; border-radius: 18px; margin-top: 10px; margin-bottom: 15px; 
+            cursor: pointer; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);
         }
-        .modal-content { cursor: default; width: 100%; max-width: 450px; margin: 0 auto; }
 
-        /* מודאל צפייה בדפי עבודה */
-        .ws-modal {
-            display: none; position: fixed; inset: 0; z-index: 3000;
-            background: rgba(0,0,0,0.95); overflow-y: auto; padding: 20px;
-            flex-direction: column; align-items: center;
+        .status-btn {
+            background: rgba(255, 255, 255, 0.15); border: 1px solid var(--glass-border);
+            padding: 15px; border-radius: 18px; text-align: center; 
+            cursor: pointer; font-weight: bold; transition: 0.3s;
         }
-        .ws-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 500px; margin-top: 60px; }
-        .ws-grid img { width: 100%; border-radius: 15px; border: 1px solid var(--glass-border); }
-        .close-ws { position: fixed; top: 20px; left: 20px; background: var(--danger); color: white; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; z-index: 3001; }
+        .status-btn.done { background: var(--accent); color: white; }
 
-        .day-box { background: rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 15px; margin-bottom: 12px; border-right: 6px solid white; }
-        .day-box.sun { border-color: var(--sun-color); }
-        .day-box.mon { border-color: var(--mon-color); }
-        .day-box.tue { border-color: var(--tue-color); }
-        .day-box.wed { border-color: var(--wed-color); }
-        .day-box.thu { border-color: var(--thu-color); }
-        .lesson { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        .schedule-trigger {
-            background: rgba(255, 255, 255, 0.2); border: 1px solid var(--glass-border);
-            padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer;
+        /* כפתורי כלים - דפי עבודה */
+        .ws-tools {
+            position: absolute; top: 15px; left: 15px;
+            display: flex; gap: 10px;
         }
+        .ws-icon-btn {
+            background: rgba(255, 255, 255, 0.25); width: 42px; height: 42px;
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 1px solid var(--glass-border); font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* מודאל הודעה קופצת (Promo) */
+        .promo-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 25px;
+        }
+        .promo-content {
+            background: linear-gradient(145deg, #1e40af, #4338ca);
+            padding: 35px; border-radius: 35px; border: 3px solid var(--accent);
+            text-align: center; max-width: 400px; position: relative;
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.4);
+            animation: modalSlide 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes modalSlide { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* מודאל זום לתמונה */
+        .zoom-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 10000; align-items: center; justify-content: center;
+        }
+        .zoom-overlay img { max-width: 95%; max-height: 90%; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
         .hidden { display: none; }
-        .logout { font-size: 13px; opacity: 0.7; cursor: pointer; }
+        input { 
+            width: 100%; padding: 18px; border-radius: 18px; border: none; 
+            margin-bottom: 12px; background: #fff; color: #000; font-size: 17px; 
+            box-sizing: border-box; outline: none;
+        }
+        .login-btn { 
+            width: 100%; padding: 18px; border-radius: 18px; border: none; 
+            background: var(--accent); color: white; font-weight: 900; 
+            font-size: 19px; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .archive-title { margin: 30px 0 15px 0; opacity: 0.7; font-size: 18px; padding-right: 10px; border-right: 3px solid var(--accent); }
     </style>
 </head>
 <body>
 
-<div id="wsViewModal" class="ws-modal">
-    <div class="close-ws" onclick="document.getElementById('wsViewModal').style.display='none'">סגור צפייה</div>
-    <div id="wsGrid" class="ws-grid"></div>
-</div>
-
-<div id="scheduleModal" class="modal" onclick="this.style.display='none'">
-    <div class="modal-content" onclick="event.stopPropagation();">
-        <h2 style="text-align:center;">📅 מערכת שעות - ז'8</h2>
-        <div class="day-box sun">
-            <div style="color:var(--sun-color); font-weight:900; margin-bottom:8px;">יום ראשון ☀️</div>
-            <div class="lesson"><span>מדעי הרוח</span><span>1</span></div>
-            <div class="lesson"><span>אנגלית</span><span>2</span></div>
-            <div class="lesson"><span>מתמטיקה</span><span>3</span></div>
-            <div class="lesson"><span>מדעי הטבע</span><span>4</span></div>
-        </div>
-        <div class="day-box mon">
-            <div style="color:var(--mon-color); font-weight:900; margin-bottom:8px;">יום שני 🎈</div>
-            <div class="lesson"><span>מדעי הטבע</span><span>1</span></div>
-            <div class="lesson"><span>חינוך</span><span>2</span></div>
-            <div class="lesson"><span>לשון</span><span>3</span></div>
-            <div class="lesson"><span>מתמטיקה</span><span>4</span></div>
-        </div>
-        <div class="day-box tue">
-            <div style="color:var(--tue-color); font-weight:900; margin-bottom:8px;">יום שלישי 🍀</div>
-            <div class="lesson"><span>מדעי הרוח</span><span>1</span></div>
-            <div class="lesson"><span>מדעי הטבע</span><span>2</span></div>
-            <div class="lesson"><span>חנ"ג</span><span>3</span></div>
-            <div class="lesson"><span>לשון</span><span>4</span></div>
-        </div>
-        <div class="day-box wed">
-            <div style="color:var(--wed-color); font-weight:900; margin-bottom:8px;">יום רביעי 💎</div>
-            <div class="lesson"><span>אנגלית</span><span>1</span></div>
-            <div class="lesson"><span>ערבית</span><span>2</span></div>
-            <div class="lesson"><span>מתמטיקה</span><span>3</span></div>
-            <div class="lesson"><span>חנ"ג</span><span>4</span></div>
-        </div>
-        <div class="day-box thu">
-            <div style="color:var(--thu-color); font-weight:900; margin-bottom:8px;">יום חמישי 🦄</div>
-            <div class="lesson"><span>מדעי הרוח</span><span>1</span></div>
-            <div class="lesson"><span>ייחוד סניפי</span><span>2</span></div>
-            <div class="lesson"><span>אנגלית</span><span>3</span></div>
-            <div class="lesson"><span>ערבית</span><span>4</span></div>
-        </div>
-    </div>
-</div>
-
-<div id="imgModal" class="modal" onclick="this.style.display='none'">
-    <div class="modal-content">
-        <img id="modalImg" src="" style="width:100%; border-radius:20px;">
+<div id="promoModal" class="promo-overlay">
+    <div class="promo-content">
+        <div style="font-size: 50px; margin-bottom: 15px;">📄✨</div>
+        <h2 style="margin:0; color: #fff;">חדש במערכת!</h2>
+        <p style="font-size: 18px; line-height: 1.6; margin: 20px 0;">
+            מהיום אפשר להעלות את <b>דפי העבודה</b> שלכם ישירות לכל משימה. <br><br>
+            לחצו על האייקון של הדף, צלמו את המחברת (עד 10 דפים) וזהו! המורה יקבל את זה מיד.
+        </p>
+        <button onclick="closePromo()" style="background:var(--accent); color:white; border:none; padding:15px 40px; border-radius:18px; font-weight:bold; font-size:18px; cursor:pointer;">מגניב, הבנתי!</button>
     </div>
 </div>
 
 <div class="main-container">
-    <div id="loginArea">
-        <h2 style="text-align:center;">המשימות שלי ✨</h2>
-        <input type="text" id="studentName" placeholder="איך קוראים לך?">
-        <input type="text" id="classCode" placeholder="קוד כיתה">
-        <button class="login-btn" onclick="enterClass()">כניסה</button>
+    <div id="loginArea" class="glass-card">
+        <h1 style="text-align:center; margin-top:0;">שלום תלמיד 👋</h1>
+        <p style="text-align:center; opacity:0.8; margin-bottom:25px;">הכנס פרטים כדי לראות משימות</p>
+        <input type="text" id="studentName" placeholder="שם מלא של התלמיד">
+        <input type="text" id="classCode" placeholder="קוד כיתה (למשל: RALI10)">
+        <button class="login-btn" onclick="login()">כניסה למערכת</button>
     </div>
 
-    <div id="taskArea" class="hidden">
-        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div id="helloName" style="font-size: 24px; font-weight: 900;"></div>
-            <div style="text-align:left;">
-                <div class="logout" onclick="logout()">התנתקות</div>
-                <div class="schedule-trigger" onclick="document.getElementById('scheduleModal').style.display='block'">📅 מערכת</div>
+    <div id="dashboard" class="hidden">
+        <div class="glass-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="helloMsg" style="margin:0;"></h2>
+                <button onclick="logout()" style="background:none; border:none; color:#ff4d4d; font-weight:bold; cursor:pointer;">התנתק</button>
             </div>
+            
+            <div class="schedule-grid" id="schedule"></div>
         </div>
 
-        <div style="font-size: 14px; opacity: 0.6; margin-bottom: 10px; font-weight: 800;">🚀 משימות קרובות</div>
         <div id="activeTasks"></div>
 
         <div id="archiveWrapper" class="hidden">
-            <div style="font-size: 14px; opacity: 0.6; margin: 30px 0 10px; font-weight: 800;">✅ סיימת</div>
-            <div id="archivedTasks" class="archive-grid"></div>
+            <div class="archive-title">משימות שסיימתי ✅</div>
+            <div id="archiveTasks"></div>
         </div>
     </div>
 </div>
 
+<div id="zoomModal" class="zoom-overlay" onclick="this.style.display='none'">
+    <img id="zoomImg" src="">
+</div>
+
+<input type="file" id="filePicker" multiple accept="image/*" style="display:none;">
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, query, where, onSnapshot, setDoc, doc, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, query, where, onSnapshot, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
@@ -231,117 +183,150 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let student = "";
-    let classCode = "";
 
-    window.onload = () => {
-        const savedName = localStorage.getItem('studentName');
-        const savedCode = localStorage.getItem('classCode');
-        if (savedName && savedCode) {
-            document.getElementById('studentName').value = savedName;
-            document.getElementById('classCode').value = savedCode;
-            enterClass();
-        }
+    let currentStudent = "";
+    let currentClass = "";
+    let targetTaskId = "";
+
+    // פונקציית התחברות
+    window.login = (savedName, savedCode) => {
+        currentStudent = savedName || document.getElementById('studentName').value.trim();
+        currentClass = (savedCode || document.getElementById('classCode').value.trim()).toUpperCase();
+
+        if(!currentStudent || !currentClass) return alert("נא למלא את כל השדות");
+
+        localStorage.setItem('student', currentStudent);
+        localStorage.setItem('classCode', currentClass);
+
+        document.getElementById('loginArea').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('helloMsg').innerText = "היי, " + currentStudent;
+
+        showPromoIfNeeded();
+        renderSchedule();
+        initDataSync();
     };
 
-    function formatFullDate(ts) {
-        const d = new Date(ts);
-        const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-        return `יום ${days[d.getDay()]}, ${d.toLocaleDateString('he-IL')} בשעה ${d.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'})}`;
+    // הודעה קופצת - פעם אחת בלבד
+    function showPromoIfNeeded() {
+        if(!localStorage.getItem('promo_seen_v2')) {
+            document.getElementById('promoModal').style.display = 'flex';
+        }
+    }
+    window.closePromo = () => {
+        localStorage.setItem('promo_seen_v2', 'true');
+        document.getElementById('promoModal').style.display = 'none';
+    };
+
+    // רינדור מערכת שעות מלאה
+    function renderSchedule() {
+        const data = {
+            'א': [{s:'חשבון', c:'var(--sun-color)'}, {s:'תורה', c:'var(--sun-color)'}],
+            'ב': [{s:'אנגלית', c:'var(--mon-color)'}, {s:'מדעים', c:'var(--mon-color)'}],
+            'ג': [{s:'חשבון', c:'var(--tue-color)'}, {s:'ספורט', c:'var(--tue-color)'}],
+            'ד': [{s:'שפה', c:'var(--wed-color)'}, {s:'מוזיקה', c:'var(--wed-color)'}],
+            'ה': [{s:'תורה', c:'var(--thu-color)'}, {s:'חשבון', c:'var(--thu-color)'}]
+        };
+        const container = document.getElementById('schedule');
+        container.innerHTML = '';
+        Object.entries(data).forEach(([day, lessons]) => {
+            let col = `<div class="day-column"><div class="day-label">${day}'</div>`;
+            lessons.forEach(l => {
+                col += `<div class="subject-dot" style="background:${l.c}">${l.s}</div>`;
+            });
+            col += `</div>`;
+            container.innerHTML += col;
+        });
     }
 
-    window.enterClass = async () => {
-        student = document.getElementById('studentName').value.trim();
-        classCode = document.getElementById('classCode').value.trim().toUpperCase();
-        if(!student || !classCode) return;
-        const q = query(collection(db, "classes"), where("code", "==", classCode));
-        const snap = await getDocs(q);
-        if(snap.empty) { alert("קוד כיתה לא נמצא"); return; }
-        localStorage.setItem('studentName', student);
-        localStorage.setItem('classCode', classCode);
-        document.getElementById('loginArea').classList.add('hidden');
-        document.getElementById('taskArea').classList.remove('hidden');
-        document.getElementById('helloName').innerText = "היי " + student;
-        loadTasks();
-    };
+    // סנכרון נתונים מלא (משימות + ביצועים)
+    function initDataSync() {
+        const qTasks = query(collection(db, "tasks"), where("classCode", "==", currentClass));
+        const qDone = query(collection(db, "submissions"), where("classCode", "==", currentClass), where("studentName", "==", currentStudent));
 
-    function loadTasks() {
-        onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tasksSnap) => {
-            onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student), where("classCode", "==", classCode)), (subSnap) => {
-                const doneMap = {};
-                subSnap.forEach(sDoc => { if(sDoc.data().completed) doneMap[sDoc.data().taskId] = true; });
-                const activeDiv = document.getElementById('activeTasks');
-                const archiveDiv = document.getElementById('archivedTasks');
-                activeDiv.innerHTML = ''; archiveDiv.innerHTML = '';
-                let allTasks = [];
-                tasksSnap.forEach(tDoc => { allTasks.push({ id: tDoc.id, ...tDoc.data() }); });
-                allTasks.sort((a, b) => a.endTime - b.endTime);
+        onSnapshot(qDone, (doneSnap) => {
+            const doneIds = {};
+            doneSnap.forEach(d => { if(d.data().completed) doneIds[d.data().taskId] = true; });
 
-                allTasks.forEach(t => {
-                    if(doneMap[t.id]) {
-                        archiveDiv.innerHTML += `<div class="archive-card"><div>${t.title}</div><div style="color:var(--accent); cursor:pointer; margin-top:5px;" onclick="toggleTask('${t.id}', true)">החזר</div></div>`;
-                    } else {
-                        const canEdit = !t.worksheets || t.worksheetBy === student;
-                        let wsButtons = `<div class="ws-controls">`;
-                        if(t.worksheets) {
-                            wsButtons += `<div class="ws-btn" onclick="viewWS('${t.id}')">👁️</div>`;
-                            if(canEdit) wsButtons += `<div class="ws-btn del" onclick="deleteWS('${t.id}')">🗑️</div>`;
-                        } else {
-                            wsButtons += `<div class="ws-btn" onclick="document.getElementById('file_${t.id}').click()">+</div>
-                            <input type="file" id="file_${t.id}" class="hidden" multiple accept="image/*" onchange="uploadWS('${t.id}', this)">`;
-                        }
-                        wsButtons += `</div>`;
+            onSnapshot(qTasks, (taskSnap) => {
+                const activeCont = document.getElementById('activeTasks');
+                const archiveCont = document.getElementById('archiveTasks');
+                activeCont.innerHTML = ''; archiveCont.innerHTML = '';
 
-                        activeDiv.innerHTML += `
+                taskSnap.forEach(tDoc => {
+                    const task = tDoc.data();
+                    const isDone = doneIds[tDoc.id];
+                    
+                    const html = `
                         <div class="task-card">
-                            ${wsButtons}
-                            <div class="task-title">${t.title}</div>
-                            <div class="task-date">🕒 ${t.worksheets ? '📄 עודכן ע"י ' + t.worksheetBy : 'הגשה עד: ' + formatFullDate(t.endTime)}</div>
-                            ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="zoom('${t.imageUrl}')">` : ''}
-                            <div class="status-btn" onclick="toggleTask('${t.id}', false )">⬜ סמן כבוצע</div>
-                        </div>`;
-                    }
+                            <div class="ws-tools">
+                                <div class="ws-icon-btn" onclick="triggerUpload('${tDoc.id}')">📄</div>
+                            </div>
+                            <div class="task-title">${task.title}</div>
+                            ${task.imageUrl ? `<img src="${task.imageUrl}" class="task-img" onclick="zoomImg('${task.imageUrl}')">` : ''}
+                            <div class="status-btn ${isDone ? 'done' : ''}" onclick="toggleStatus('${tDoc.id}', ${isDone})">
+                                ${isDone ? '✅ סומן כבוצע' : '⬜ סמן כבוצע'}
+                            </div>
+                        </div>
+                    `;
+
+                    if(isDone) archiveCont.innerHTML += html;
+                    else activeCont.innerHTML += html;
                 });
-                document.getElementById('archiveWrapper').classList.toggle('hidden', archiveDiv.innerHTML === '');
+                document.getElementById('archiveWrapper').classList.toggle('hidden', archiveCont.innerHTML === '');
             });
         });
     }
 
-    window.uploadWS = async (taskId, input) => {
-        const files = Array.from(input.files);
-        if(files.length === 0 || files.length > 10) return alert("ניתן להעלות בין 1 ל-10 דפים");
+    // העלאת דפי עבודה (עד 10)
+    window.triggerUpload = (id) => {
+        targetTaskId = id;
+        document.getElementById('filePicker').click();
+    };
+
+    document.getElementById('filePicker').onchange = async (e) => {
+        const files = Array.from(e.target.files).slice(0, 10);
+        if(!files.length) return;
+
+        alert("מעלה " + files.length + " דפי עבודה...");
         
-        const promises = files.map(file => new Promise(res => {
-            const r = new FileReader();
-            r.onload = e => res(e.target.result);
-            r.readAsDataURL(file);
+        const b64Array = await Promise.all(files.map(f => {
+            return new Promise(res => {
+                const reader = new FileReader();
+                reader.onload = (ev) => res(ev.target.result);
+                reader.readAsDataURL(f);
+            });
         }));
-        
-        const images = await Promise.all(promises);
-        await updateDoc(doc(db, "tasks", taskId), { worksheets: images, worksheetBy: student });
-        alert("דפי העבודה הועלו לכל הכיתה!");
+
+        await updateDoc(doc(db, "tasks", targetTaskId), {
+            worksheets: b64Array,
+            worksheetBy: currentStudent
+        });
+        alert("הדפים נשלחו למורה!");
     };
 
-    window.viewWS = async (taskId) => {
-        const snap = await getDocs(query(collection(db, "tasks")));
-        const task = snap.docs.find(d => d.id === taskId).data();
-        const grid = document.getElementById('wsGrid');
-        grid.innerHTML = task.worksheets.map(img => `<img src="${img}">`).join('');
-        document.getElementById('wsViewModal').style.display = 'flex';
+    window.toggleStatus = async (tid, isDone) => {
+        await setDoc(doc(db, "submissions", currentStudent + "_" + tid), {
+            studentName: currentStudent,
+            taskId: tid,
+            completed: !isDone,
+            classCode: currentClass
+        });
     };
 
-    window.deleteWS = async (taskId) => {
-        if(confirm("למחוק את דפי העבודה שעדכנת?")) {
-            await updateDoc(doc(db, "tasks", taskId), { worksheets: null, worksheetBy: null });
-        }
+    window.zoomImg = (url) => {
+        document.getElementById('zoomImg').src = url;
+        document.getElementById('zoomModal').style.display = 'flex';
     };
 
-    window.toggleTask = async (taskId, isDone) => {
-        await setDoc(doc(db, "submissions", student + "_" + taskId), { studentName: student, taskId: taskId, completed: !isDone, classCode: classCode, submittedAt: Date.now() });
-    };
-
-    window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'flex'; };
     window.logout = () => { localStorage.clear(); location.reload(); };
+
+    // טעינה אוטומטית
+    window.onload = () => {
+        const s = localStorage.getItem('student');
+        const c = localStorage.getItem('classCode');
+        if(s && c) login(s, c);
+    };
 </script>
 </body>
 </html>
