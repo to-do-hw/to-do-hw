@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ראלי מטו"ס - ממשק פיזיקלי מלא</title>
+    <title>ראלי מטו"ס - Ultra Smooth & Info</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap');
 
@@ -26,44 +26,47 @@
             display: flex; justify-content: center;
         }
 
-        .main-container { width: 100%; max-width: 480px; position: relative; z-index: 10; }
+        .main-container { width: 100%; max-width: 480px; position: relative; }
 
-        /* אנימציית כניסה קפיצית */
+        #activeTasks { display: flex; flex-direction: column; position: relative; }
+
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
-            border-radius: 28px; padding: 25px; margin-bottom: 25px;
+            border-radius: 28px; padding: 25px; margin-bottom: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            animation: springIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-            transition: transform 0.4s, opacity 0.4s;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s, margin 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
 
-        @keyframes springIn {
-            0% { transform: scale(0.6) translateY(100px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
+        /* אנימציית כניסה למשימה שחוזרת מהארכיון */
+        .entry-anim {
+            animation: slideInDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
-        /* אנימציית יציאה (החלקה הצידה) */
-        .exit-slide {
+        @keyframes slideInDown {
+            0% { transform: translateY(-100px) scale(0.8); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* אנימציית יציאה (החלקה וסגירת רווח) */
+        .exit-anim {
             transform: translateX(-150%) rotate(-10deg) !important;
             opacity: 0 !important;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s !important;
+            margin-bottom: -180px !important; /* סוגר את הרווח למשימות שמתחתיו */
+            pointer-events: none;
         }
 
-        .glass-card.overdue {
-            border: 1px solid var(--danger);
-            box-shadow: 0 0 30px rgba(255, 75, 92, 0.25);
-        }
+        .overdue { border: 1.5px solid var(--danger); box-shadow: 0 0 25px rgba(255, 75, 92, 0.2); }
 
         .btn-action {
             width: 100%; padding: 18px; border-radius: 18px; border: none;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white; font-weight: 800; font-size: 19px; cursor: pointer;
-            transition: 0.2s; margin-top: 15px;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3); transition: 0.2s;
         }
-        .btn-action:active { transform: scale(0.94); }
+        .btn-action:active { transform: scale(0.95); }
 
         .icon-btn {
             width: 48px; height: 48px; border-radius: 15px;
@@ -72,7 +75,6 @@
             color: white; font-size: 20px; cursor: pointer;
         }
 
-        /* מודאלים */
         .modal {
             display: none; position: fixed; inset: 0; z-index: 2000;
             background: rgba(0,0,0,0.9); backdrop-filter: blur(15px);
@@ -80,22 +82,19 @@
         }
         .modal-inner {
             width: 90%; max-width: 420px; background: #1a1a2e; border-radius: 35px;
-            padding: 25px; max-height: 80vh; overflow-y: auto; border: 1px solid var(--accent);
+            padding: 25px; border: 1px solid var(--accent);
         }
 
-        #zoomModal { cursor: zoom-out; }
-        #zoomImg { max-width: 95%; max-height: 90vh; border-radius: 15px; transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-        .day-box {
-            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px;
-            margin-bottom: 12px; border-right: 5px solid var(--primary);
+        .day-tag {
+            display: inline-block; padding: 4px 12px; border-radius: 10px;
+            background: rgba(34, 211, 238, 0.15); color: var(--accent);
+            font-weight: 700; font-size: 13px; margin-bottom: 8px;
         }
 
         .hidden { display: none !important; }
         input {
             width: 100%; padding: 18px; margin-bottom: 15px; border-radius: 16px;
-            border: 1px solid var(--glass-border); background: rgba(0,0,0,0.4);
-            color: white; font-size: 17px; box-sizing: border-box;
+            border: 1px solid var(--glass-border); background: rgba(0,0,0,0.4); color: white;
         }
         .task-img { width: 100%; border-radius: 20px; margin-top: 15px; cursor: zoom-in; }
     </style>
@@ -112,26 +111,26 @@
 
     <div id="taskArea" class="hidden">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <div id="helloName" style="font-size: 32px; font-weight: 800;"></div>
-            <button onclick="showSchedule()" style="background: white; border: none; padding: 12px 22px; border-radius: 16px; font-weight: 800; cursor: pointer;">📅 מערכת</button>
+            <div id="helloName" style="font-size: 30px; font-weight: 800;"></div>
+            <button onclick="showSchedule()" style="background: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer;">📅 מערכת</button>
         </div>
         <div id="activeTasks"></div>
         <div id="archiveWrapper" class="hidden">
-            <h3 style="color: var(--success); margin-top: 40px; margin-right: 10px;">בוצעו ✨</h3>
-            <div id="archivedTasks" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"></div>
+            <h3 style="color: var(--success); margin-top: 40px; margin-right: 10px;">סיימת בהצלחה ✨</h3>
+            <div id="archivedTasks" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
         </div>
     </div>
 </div>
 
 <div id="zoomModal" class="modal" onclick="closeZoom()">
-    <img id="zoomImg" src="">
+    <img id="zoomImg" src="" style="max-width:95%; max-height:85vh; border-radius:15px; box-shadow: 0 0 50px rgba(0,0,0,1);">
 </div>
 
 <div id="scheduleModal" class="modal" onclick="closeModal('scheduleModal')">
     <div class="modal-inner" onclick="event.stopPropagation()">
         <h2 style="text-align:center;">מערכת שעות</h2>
-        <div id="scheduleContainer"></div>
-        <button class="btn-action" style="background: var(--danger)" onclick="closeModal('scheduleModal')">סגור</button>
+        <div id="scheduleContainer" style="max-height: 60vh; overflow-y: auto;"></div>
+        <button class="btn-action" style="background: var(--danger); margin-top: 20px;" onclick="closeModal('scheduleModal')">סגור</button>
     </div>
 </div>
 
@@ -159,89 +158,97 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     let student = "", classCode = "", currentSchedule = {};
+    let isAnimating = false;
+
+    const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
 
     window.enterClass = async () => {
         student = document.getElementById('studentName').value.trim();
         classCode = document.getElementById('classCode').value.trim().toUpperCase();
         if(!student || !classCode) return;
         const snap = await getDocs(query(collection(db, "classes"), where("code", "==", classCode)));
-        if(snap.empty) return alert("קוד כיתה שגוי");
+        if(snap.empty) return alert("קוד כיתה לא קיים");
         currentSchedule = snap.docs[0].data().schedule || {};
         localStorage.setItem('studentName', student);
         localStorage.setItem('classCode', classCode);
         document.getElementById('loginArea').classList.add('hidden');
         document.getElementById('taskArea').classList.remove('hidden');
-        document.getElementById('helloName').innerText = "היי, " + student;
+        document.getElementById('helloName').innerText = "שלום, " + student;
         loadTasks();
     };
 
     function loadTasks() {
         onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tSnap) => {
             onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student)), (sSnap) => {
+                if(isAnimating) return;
+
                 const done = {}; sSnap.forEach(d => { if(d.data().completed) done[d.data().taskId] = true; });
                 const act = document.getElementById('activeTasks'), arc = document.getElementById('archivedTasks');
                 
-                // עדכון רק אם אין אנימציה פעילה כרגע
-                if (document.querySelectorAll('.exit-slide').length === 0) {
-                    act.innerHTML = ''; arc.innerHTML = '';
-                    let tasks = []; tSnap.forEach(d => tasks.push({id: d.id, ...d.data()}));
-                    tasks.sort((a,b) => a.endTime - b.endTime);
+                const currentActiveIds = Array.from(act.children).map(c => c.id.replace('card-', ''));
+                let tasks = []; tSnap.forEach(d => tasks.push({id: d.id, ...d.data()}));
+                tasks.sort((a,b) => a.endTime - b.endTime);
 
-                    tasks.forEach((t, i) => {
-                        const isOverdue = Date.now() > t.endTime;
-                        const timeStr = new Date(t.endTime).toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
-                        if(done[t.id]) {
-                            arc.innerHTML += `<div class="glass-card" style="padding:15px; opacity:0.6; text-align:center; animation: springIn 0.5s;">
-                                <b>${t.title}</b><div onclick="toggleTask('${t.id}', true)" style="color:var(--accent); cursor:pointer;">שחזר</div>
-                            </div>`;
-                        } else {
-                            const hasWS = t.worksheets && t.worksheets.length > 0;
-                            act.innerHTML += `
-                            <div id="card-${t.id}" class="glass-card ${isOverdue ? 'overdue' : ''}" style="animation-delay:${i*0.05}s">
-                                <div style="display:flex; justify-content:space-between; align-items:start;">
-                                    <div><div style="font-size:26px; font-weight:800;">${t.title}</div><div style="color:var(--accent);">🕒 שעה ${timeStr}</div></div>
-                                    <div style="display:flex; gap:10px;">
-                                        <div class="icon-btn" onclick="uploadWS('${t.id}')">➕</div>
-                                        ${hasWS ? `<div class="icon-btn" style="background:var(--accent); color:black;" onclick="viewWS('${t.id}')">👁️</div>` : ''}
-                                        ${hasWS && t.worksheetBy === student ? `<div class="icon-btn" style="background:var(--danger)" onclick="deleteWS('${t.id}')">🗑️</div>` : ''}
-                                    </div>
+                let actHTML = '', arcHTML = '';
+                tasks.forEach(t => {
+                    const dateObj = new Date(t.endTime);
+                    const dayName = days[dateObj.getDay()];
+                    const timeStr = dateObj.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
+                    const isOverdue = Date.now() > t.endTime;
+                    
+                    if(done[t.id]) {
+                        arcHTML += `<div class="glass-card" style="padding:15px; opacity:0.6; font-size:13px; margin-bottom:10px;">
+                            <b>${t.title}</b><div onclick="restoreTask('${t.id}')" style="color:var(--accent); cursor:pointer;">החזר</div>
+                        </div>`;
+                    } else {
+                        const hasWS = t.worksheets && t.worksheets.length > 0;
+                        const isNew = !currentActiveIds.includes(t.id) && currentActiveIds.length > 0;
+                        actHTML += `
+                        <div id="card-${t.id}" class="glass-card ${isOverdue ? 'overdue' : ''} ${isNew ? 'entry-anim' : ''}">
+                            <div class="day-tag">יום ${dayName}</div>
+                            <div style="display:flex; justify-content:space-between; align-items:start;">
+                                <div>
+                                    <div style="font-size:26px; font-weight:800; line-height:1.1;">${t.title}</div>
+                                    <div style="color:${isOverdue ? 'var(--danger)' : 'var(--accent)'}; font-weight:700;">🕒 שעה ${timeStr}</div>
                                 </div>
-                                ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="openZoom('${t.imageUrl}')">` : ''}
-                                <button class="btn-action" onclick="finishTaskAnimation('${t.id}')">סיימתי!</button>
-                            </div>`;
-                        }
-                    });
-                    document.getElementById('archiveWrapper').classList.toggle('hidden', arc.innerHTML === '');
-                }
+                                <div style="display:flex; gap:10px;">
+                                    <div class="icon-btn" onclick="uploadWS('${t.id}')">➕</div>
+                                    ${hasWS ? `<div class="icon-btn" style="background:var(--accent); color:black;" onclick="viewWS('${t.id}')">👁️</div>` : ''}
+                                </div>
+                            </div>
+                            ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="openZoom('${t.imageUrl}')">` : ''}
+                            <button class="btn-action" onclick="finishTask('${t.id}')">סימנתי סיום!</button>
+                        </div>`;
+                    }
+                });
+                act.innerHTML = actHTML;
+                arc.innerHTML = arcHTML;
+                document.getElementById('archiveWrapper').classList.toggle('hidden', arcHTML === '');
             });
         });
     }
 
-    // הפונקציה החדשה שמטפלת באנימציית ההחלקה
-    window.finishTaskAnimation = (tid) => {
+    window.finishTask = (tid) => {
+        isAnimating = true;
         const card = document.getElementById(`card-${tid}`);
-        if (!card) return;
-
-        // הוספת קלאס האנימציה
-        card.classList.add('exit-slide');
-
-        // המתנה לסיום האנימציה לפני עדכון ה-DB
-        setTimeout(async () => {
-            await toggleTask(tid, false);
-        }, 500);
+        if(card) {
+            card.classList.add('exit-anim');
+            setTimeout(async () => {
+                await setDoc(doc(db, "submissions", student + "_" + tid), { 
+                    studentName: student, taskId: tid, completed: true, classCode: classCode 
+                });
+                isAnimating = false;
+            }, 550);
+        }
     };
 
-    window.toggleTask = async (tid, isDone) => {
-        await setDoc(doc(db, "submissions", student + "_" + tid), { studentName: student, taskId: tid, completed: !isDone, classCode: classCode });
+    window.restoreTask = async (tid) => {
+        isAnimating = true;
+        await setDoc(doc(db, "submissions", student + "_" + tid), { 
+            studentName: student, taskId: tid, completed: false, classCode: classCode 
+        });
+        setTimeout(() => { isAnimating = false; }, 100);
     };
-
-    window.openZoom = (url) => {
-        const modal = document.getElementById('zoomModal');
-        const img = document.getElementById('zoomImg');
-        img.src = url;
-        modal.style.display = 'flex';
-    };
-    window.closeZoom = () => { document.getElementById('zoomModal').style.display = 'none'; };
 
     window.uploadWS = (id) => {
         const inp = document.createElement('input'); inp.type = 'file'; inp.multiple = true;
@@ -263,20 +270,20 @@
         document.getElementById('wsModal').style.display = 'flex';
     };
 
-    window.deleteWS = async (id) => {
-        if(confirm("למחוק דפים שלך?")) await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null });
-    };
-
+    window.openZoom = (url) => { document.getElementById('zoomImg').src = url; document.getElementById('zoomModal').style.display = 'flex'; };
+    window.closeZoom = () => { document.getElementById('zoomModal').style.display = 'none'; };
     window.showSchedule = () => {
         const container = document.getElementById('scheduleContainer');
         const dNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי"];
         container.innerHTML = dNames.map((day, i) => {
             const lessons = currentSchedule[`day${i}`] || [];
-            return `<div class="day-box"><strong>יום ${day}</strong>${lessons.map(l => `<div style="display:flex; justify-content:space-between; font-size:14px;"><span>${l.subject}</span><span>${l.time}</span></div>`).join('')}</div>`;
+            return `<div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin-bottom:10px; border-right:4px solid var(--primary);">
+                <strong>יום ${day}</strong>
+                ${lessons.map(l => `<div style="display:flex; justify-content:space-between; font-size:14px; margin-top:5px;"><span>${l.subject}</span><span>${l.time}</span></div>`).join('')}
+            </div>`;
         }).join('');
         document.getElementById('scheduleModal').style.display = 'flex';
     };
-
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
     window.onload = () => {
