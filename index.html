@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ניהול משימות- תלמידים</title>
+<title>ניהול משימות -תלמידים</title>
 <style>
     :root {
         --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
@@ -24,7 +24,7 @@
 
     @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
     .main-container { width: 100%; max-width: 500px; z-index: 1; }
@@ -75,7 +75,6 @@
     }
     .status-btn:hover { background: var(--accent); }
 
-    /* מודאלים */
     .modal {
         display: none; position: fixed; inset: 0; z-index: 2000;
         background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); padding: 30px 15px; overflow-y: auto;
@@ -97,7 +96,6 @@
 <div class="main-container">
     <div id="loginArea" class="glass-panel">
         <h2 style="text-align:center; font-size: 32px; margin-bottom: 10px;">היי חבר 👋</h2>
-        <p style="text-align:center; opacity:0.7; margin-bottom:30px;">ברוך הבא למערכת המשימות</p>
         <input type="text" id="studentName" placeholder="שם מלא">
         <input type="text" id="classCode" placeholder="קוד כיתה">
         <button class="btn-main" onclick="enterClass()">כניסה למערכת</button>
@@ -131,7 +129,7 @@
 
 <div id="wsViewModal" class="modal" onclick="this.style.display='none'">
     <div class="modal-content" onclick="event.stopPropagation();">
-        <h3 style="text-align:center;">📄 דפי עבודה שהועלו</h3>
+        <h3 style="text-align:center;">📄 דפי עבודה</h3>
         <div id="wsGrid" style="display:grid; gap:15px;"></div>
         <button class="btn-main" style="margin-top:20px;" onclick="document.getElementById('wsViewModal').style.display='none'">סגור</button>
     </div>
@@ -167,6 +165,8 @@
         if(snap.empty) return alert("קוד כיתה שגוי");
 
         currentSchedule = snap.docs[0].data().schedule || {};
+        
+        // שמירה ל-LocalStorage
         localStorage.setItem('studentName', student);
         localStorage.setItem('classCode', classCode);
 
@@ -253,8 +253,22 @@
     window.deleteWS = async (id) => { if(confirm("למחוק דפים שלך?")) await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null }); };
     window.toggleTask = async (tid, isDone) => { await setDoc(doc(db, "submissions", student + "_" + tid), { studentName: student, taskId: tid, completed: !isDone, classCode: classCode }); };
     window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'block'; };
-    window.logout = () => { localStorage.clear(); location.reload(); };
-    window.onload = () => { if(localStorage.getItem('studentName')) enterClass(); };
+    
+    window.logout = () => { 
+        localStorage.clear(); 
+        location.reload(); 
+    };
+
+    // התחברות אוטומטית בעת טעינה
+    window.onload = () => { 
+        const n = localStorage.getItem('studentName');
+        const c = localStorage.getItem('classCode');
+        if(n && c) {
+            document.getElementById('studentName').value = n;
+            document.getElementById('classCode').value = c;
+            enterClass();
+        }
+    };
 </script>
 </body>
 </html>
