@@ -3,135 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ראלי מטו"ס - המהדורה המלאה</title>
+    <title>ראלי מטו"ס - Ultra Pro</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap');
 
         :root {
-            --main-bg: #f0f4f8;
-            --primary: #4f46e5;
-            --accent: #06b6d4;
-            --danger: #ef4444;
-            --success: #10b981;
-            --glass: rgba(255, 255, 255, 0.7);
-            /* צבעי ימי השבוע למערכת */
-            --sun: #fbbf24; --mon: #f87171; --tue: #34d399; --wed: #60a5fa; --thu: #c084fc;
+            --bg: #0b0e14;
+            --card: rgba(23, 28, 41, 0.8);
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --neon-pink: #ff007a;
+            --neon-green: #00ff87;
+            --neon-red: #ff3131;
+            --text: #ffffff;
         }
 
         body {
             font-family: 'Assistant', sans-serif;
             margin: 0; padding: 15px; direction: rtl; min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: radial-gradient(circle at top right, #1e3a8a, #0b0e14 60%);
             background-attachment: fixed;
-            color: #1e293b;
+            color: var(--text);
             display: flex; justify-content: center;
         }
 
-        .main-wrapper { width: 100%; max-width: 480px; z-index: 2; }
+        .container { width: 100%; max-width: 480px; z-index: 5; }
 
-        /* כרטיסיות עם אפקט עומק והילה */
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 28px; padding: 25px; margin-bottom: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1), inset 0 0 20px rgba(255,255,255,0.3);
-            animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+        /* כרטיסיות עם הילת ניאון */
+        .task-card {
+            background: var(--card);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 26px; padding: 22px; margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 210, 255, 0.1);
+            animation: bounceIn 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67) backwards;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes bounceIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* משימה באיחור - הילה אדומה עדינה */
-        .card.overdue {
-            border: 2px solid var(--danger);
-            background: rgba(255, 235, 235, 0.85);
-            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2);
+        /* משימה באיחור - אדום בוער */
+        .task-card.overdue {
+            border: 1px solid var(--neon-red);
+            box-shadow: 0 0 25px rgba(255, 49, 49, 0.3);
+            background: rgba(40, 10, 10, 0.8);
         }
 
-        .task-title { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+        .task-title {
+            font-size: 26px; font-weight: 800; margin-bottom: 6px;
+            background: linear-gradient(to left, #fff, var(--neon-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
 
-        /* כפתור סיום - גרדיאנט חי */
-        .btn-complete {
-            width: 100%; padding: 18px; border-radius: 20px; border: none;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            color: white; font-weight: 800; font-size: 19px; cursor: pointer;
+        /* כפתור "סיימתי" - צבעוני חזק */
+        .btn-finish {
+            width: 100%; padding: 18px; border-radius: 18px; border: none;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            color: white; font-weight: 800; font-size: 18px; cursor: pointer;
             transition: 0.3s; margin-top: 15px;
-            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
         }
-        .btn-complete:active { transform: scale(0.96); }
+        .btn-finish:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0, 210, 255, 0.2); }
 
-        /* כפתורי פעולה קטנים (פלוס ועין) */
-        .icon-btn {
-            width: 46px; height: 46px; border-radius: 14px; background: white;
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
-            cursor: pointer; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        /* כפתורי צד (פלוס ועין) */
+        .action-btn {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; cursor: pointer; transition: 0.2s;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
         }
-        .icon-btn:hover { transform: translateY(-3px) scale(1.05); }
+        .action-btn:hover { background: var(--neon-blue); color: #000; transform: translateY(-3px); }
 
-        /* מודאלים (חלונות קופצים) עם גלילה מושלמת */
+        /* מודאלים עם גלילה תקינה */
         .modal-overlay {
-            display: none; position: fixed; inset: 0; z-index: 1000;
-            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px);
-            padding: 20px; align-items: center; justify-content: center;
+            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px); z-index: 1000; padding: 20px;
+            align-items: center; justify-content: center;
         }
-        .modal-overlay.active { display: flex; }
-
         .modal-box {
-            background: white; width: 100%; max-width: 420px; max-height: 85vh;
-            border-radius: 32px; padding: 25px; overflow-y: auto;
-            position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-            -webkit-overflow-scrolling: touch;
+            background: #151921; width: 100%; max-width: 400px; max-height: 80vh;
+            border-radius: 30px; padding: 25px; border: 1px solid var(--neon-blue);
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
         }
 
-        /* עיצוב מערכת שעות בתוך המודאל */
-        .day-card {
-            padding: 16px; border-radius: 18px; margin-bottom: 15px;
-            background: #f8fafc; border-right: 6px solid var(--primary);
+        /* מערכת שעות מעוצבת */
+        .day-strip {
+            padding: 15px; border-radius: 15px; margin-bottom: 12px;
+            background: rgba(255,255,255,0.03); border-right: 5px solid var(--neon-blue);
         }
-        .day-card.sun { border-color: var(--sun); }
-        .day-card.mon { border-color: var(--mon); }
-        .day-card.tue { border-color: var(--tue); }
-        .day-card.wed { border-color: var(--wed); }
-        .day-card.thu { border-color: var(--thu); }
+        .day-sun { border-color: #fbbf24; }
+        .day-mon { border-color: #f87171; }
+        .day-tue { border-color: #34d399; }
+        .day-wed { border-color: #60a5fa; }
+        .day-thu { border-color: #c084fc; }
 
-        .hidden { display: none !important; }
-        
-        /* שדות קלט במסך כניסה */
         input {
             width: 100%; padding: 18px; margin-bottom: 15px; border-radius: 15px;
-            border: 1px solid #ddd; background: rgba(255,255,255,0.5);
-            font-size: 16px; box-sizing: border-box; outline: none;
+            border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.3);
+            color: white; font-size: 16px; box-sizing: border-box; outline: none;
         }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div class="main-wrapper">
-    <div id="loginArea" class="card" style="text-align: center;">
-        <h1 style="font-size: 38px; font-weight: 900; color: var(--primary); margin-bottom: 10px;">כניסה לתלמיד</h1>
-        <p style="margin-bottom: 30px; opacity: 0.8;">הזן שם וקוד כיתה כדי להתחיל</p>
+<div class="container">
+    <div id="loginArea" class="task-card" style="text-align: center;">
+        <h1 style="font-size: 36px; margin-bottom: 5px; color: var(--neon-blue);">ראלי מטו"ס</h1>
+        <p style="opacity: 0.6; margin-bottom: 30px;">ממשק תלמידים צבעוני ומלא</p>
         <input type="text" id="studentName" placeholder="שם מלא">
-        <input type="text" id="classCode" placeholder="קוד כיתה (למשל A1)">
-        <button class="btn-complete" onclick="enterClass()">כניסה למערכת</button>
+        <input type="text" id="classCode" placeholder="קוד כיתה">
+        <button class="btn-finish" onclick="enterClass()">התחברות חגיגית</button>
     </div>
 
     <div id="taskArea" class="hidden">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <div>
                 <div id="helloName" style="font-size: 28px; font-weight: 800;"></div>
-                <div style="color: white; font-size: 14px; cursor: pointer; text-decoration: underline;" onclick="logout()">החלף משתמש</div>
+                <div style="font-size: 13px; color: var(--neon-pink); cursor: pointer;" onclick="logout()">יציאה מהמערכת</div>
             </div>
-            <button onclick="showSchedule()" style="background: white; border: none; padding: 12px 20px; border-radius: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">📅 מערכת</button>
+            <button onclick="showSchedule()" style="background: var(--neon-blue); color: #000; border: none; padding: 10px 20px; border-radius: 14px; font-weight: 800; cursor: pointer;">📅 מערכת שעות</button>
         </div>
 
         <div id="activeTasks"></div>
 
         <div id="archiveWrapper" class="hidden">
-            <h3 style="margin-top: 40px; color: white;">משימות שסיימת ✨</h3>
+            <h3 style="color: var(--neon-green); margin-top: 40px;">משימות שהושלמו 🏆</h3>
             <div id="archivedTasks" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
         </div>
     </div>
@@ -139,17 +139,17 @@
 
 <div id="scheduleModal" class="modal-overlay">
     <div class="modal-box">
-        <h2 style="text-align:center; margin-bottom:20px;">📅 מערכת שעות שבועית</h2>
+        <h2 style="text-align:center; color: var(--neon-blue);">מערכת שעות</h2>
         <div id="scheduleContainer"></div>
-        <button class="btn-complete" onclick="closeModal('scheduleModal')" style="background: #64748b;">סגור</button>
+        <button class="btn-finish" onclick="closeModal('scheduleModal')">סגור</button>
     </div>
 </div>
 
 <div id="wsModal" class="modal-overlay">
     <div class="modal-box">
-        <h3 style="text-align:center;">דפי עבודה שהועלו</h3>
-        <div id="wsGrid" style="display:grid; gap:10px; margin: 15px 0;"></div>
-        <button class="btn-complete" onclick="closeModal('wsModal')">סגור</button>
+        <h3 style="text-align:center;">דפי עבודה</h3>
+        <div id="wsGrid" style="display:grid; gap:10px;"></div>
+        <button class="btn-finish" onclick="closeModal('wsModal')">סגור</button>
     </div>
 </div>
 
@@ -200,31 +200,31 @@
 
                 tasks.forEach((t, i) => {
                     const isOverdue = Date.now() > t.endTime;
-                    const dateObj = new Date(t.endTime);
-                    const timeStr = dateObj.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
-                    const dayStr = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"][dateObj.getDay()];
+                    const timeStr = new Date(t.endTime).toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
+                    const dayStr = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"][new Date(t.endTime).getDay()];
 
                     if(done[t.id]) {
-                        arc.innerHTML += `<div class="card" style="padding:15px; opacity:0.7; font-size:14px; text-align:center;">
-                            <b>${t.title}</b><div onclick="toggleTask('${t.id}', true)" style="color:var(--primary); cursor:pointer; font-weight:bold;">החזר למשימות</div>
+                        arc.innerHTML += `<div class="task-card" style="padding:15px; opacity:0.6;">
+                            <div style="font-weight:bold;">${t.title}</div>
+                            <div onclick="toggleTask('${t.id}', true)" style="color:var(--neon-blue); cursor:pointer; font-size:12px;">החזר</div>
                         </div>`;
                     } else {
                         const hasWS = t.worksheets && t.worksheets.length > 0;
                         act.innerHTML += `
-                        <div class="card ${isOverdue ? 'overdue' : ''}" style="animation-delay:${i*0.1}s">
+                        <div class="task-card ${isOverdue ? 'overdue' : ''}" style="animation-delay:${i*0.1}s">
                             <div style="display:flex; justify-content:space-between; align-items:start;">
                                 <div style="flex:1">
                                     <div class="task-title">${t.title}</div>
-                                    <div style="font-weight:700; color:${isOverdue ? 'var(--danger)' : 'var(--primary)'}">🕒 יום ${dayStr}, שעה ${timeStr} ${isOverdue ? '(עבר הזמן!)' : ''}</div>
+                                    <div style="color:${isOverdue ? 'var(--neon-red)' : 'var(--neon-blue)'}; font-weight:700;">🕒 יום ${dayStr}, ${timeStr}</div>
                                 </div>
                                 <div style="display:flex; gap:10px;">
-                                    <div class="icon-btn" onclick="uploadWS('${t.id}')" title="העלאת דף">➕</div>
-                                    ${hasWS ? `<div class="icon-btn" style="background:var(--accent); color:white;" onclick="viewWS('${t.id}')">👁️</div>` : ''}
-                                    ${hasWS && t.worksheetBy === student ? `<div class="icon-btn" style="background:var(--danger); color:white;" onclick="deleteWS('${t.id}')">🗑️</div>` : ''}
+                                    <div class="action-btn" onclick="uploadWS('${t.id}')">➕</div>
+                                    ${hasWS ? `<div class="action-btn" style="color:var(--neon-green)" onclick="viewWS('${t.id}')">👁️</div>` : ''}
+                                    ${hasWS && t.worksheetBy === student ? `<div class="action-btn" style="color:var(--neon-red)" onclick="deleteWS('${t.id}')">🗑️</div>` : ''}
                                 </div>
                             </div>
-                            ${t.imageUrl ? `<img src="${t.imageUrl}" style="width:100%; border-radius:18px; margin-top:15px; cursor:pointer;" onclick="zoom('${t.imageUrl}')">` : ''}
-                            <button class="btn-complete" onclick="toggleTask('${t.id}', false)">סימנתי שסיימתי!</button>
+                            ${t.imageUrl ? `<img src="${t.imageUrl}" style="width:100%; border-radius:15px; margin-top:15px; border:1px solid rgba(255,255,255,0.1)">` : ''}
+                            <button class="btn-finish" onclick="toggleTask('${t.id}', false)">סימנתי שסיימתי ✅</button>
                         </div>`;
                     }
                 });
@@ -253,14 +253,12 @@
     window.viewWS = async (id) => {
         const d = await getDocs(collection(db, "tasks"));
         const t = d.docs.find(doc => doc.id === id).data();
-        document.getElementById('wsGrid').innerHTML = t.worksheets.map(img => `<img src="${img}" style="width:100%; border-radius:15px; margin-bottom:10px;">`).join('');
-        document.getElementById('wsModal').classList.add('active');
+        document.getElementById('wsGrid').innerHTML = t.worksheets.map(img => `<img src="${img}" style="width:100%; border-radius:10px;">`).join('');
+        document.getElementById('wsModal').style.display = 'flex';
     };
 
     window.deleteWS = async (id) => {
-        if(confirm("למחוק את הדפים שהעלית?")) {
-            await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null });
-        }
+        if(confirm("למחוק את הדפים שלך?")) await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null });
     };
 
     window.showSchedule = () => {
@@ -269,16 +267,15 @@
         const dKeys = ["sun", "mon", "tue", "wed", "thu"];
         container.innerHTML = dNames.map((day, i) => {
             const lessons = currentSchedule[`day${i}`] || [];
-            return `<div class="day-card ${dKeys[i]}">
+            return `<div class="day-strip day-${dKeys[i]}">
                 <strong style="font-size:18px;">יום ${day}</strong>
-                ${lessons.map(l => `<div style="display:flex; justify-content:space-between; margin-top:5px;"><span>${l.subject}</span><span>${l.time}</span></div>`).join('')}
-                ${lessons.length === 0 ? '<div style="opacity:0.5; font-size:13px;">אין שיעורים</div>' : ''}
+                ${lessons.map(l => `<div style="display:flex; justify-content:space-between; margin-top:4px; font-size:14px;"><span>${l.subject}</span><span>${l.time}</span></div>`).join('')}
             </div>`;
         }).join('');
-        document.getElementById('scheduleModal').classList.add('active');
+        document.getElementById('scheduleModal').style.display = 'flex';
     };
 
-    window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
     window.logout = () => { localStorage.clear(); location.reload(); };
 
     window.onload = () => {
