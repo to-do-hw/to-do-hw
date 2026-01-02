@@ -30,11 +30,10 @@
     .main-container { width: 100%; max-width: 500px; z-index: 1; }
     .glass-panel { background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 35px; padding: 30px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); animation: scaleIn 0.5s ease-out; }
 
-    /* --- מד ריכוז עליון חדש --- */
-    .stats-bar { background: rgba(0,0,0,0.25); border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
-    .progress-bg { background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+    /* מד סטטיסטיקה חדש */
+    .stats-card { background: rgba(0,0,0,0.25); border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
+    .progress-track { background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
     #progressBar { background: var(--accent); height: 100%; width: 0%; transition: 1s ease; }
-    .gold-status { border-color: #fbbf24 !important; box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
 
     input, select { width: 100%; padding: 20px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1); border: 2px solid transparent; border-radius: 20px; color: white; font-size: 18px; box-sizing: border-box; outline: none; transition: 0.3s; }
     input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.2); }
@@ -44,7 +43,6 @@
 
     .schedule-btn-ui { background: rgba(255,255,255,0.15); border: 1px solid var(--glass-border); padding: 12px 20px; border-radius: 18px; cursor: pointer; font-weight: bold; animation: pulse 2s infinite; text-align: center; }
 
-    /* כרטיס משימה */
     .task-card { background: rgba(255, 255, 255, 0.15); border: 1px solid var(--glass-border); border-radius: 25px; padding: 22px; margin-bottom: 20px; position: relative; animation: fadeInUp 0.6s ease-out backwards; transition: 0.3s; }
     .ws-controls { position: absolute; top: 18px; left: 18px; display: flex; gap: 8px; z-index: 10; }
     .ws-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid var(--glass-border); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
@@ -56,7 +54,7 @@
     .status-btn { padding: 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.08); text-align: center; font-weight: 800; cursor: pointer; border: 1px solid var(--glass-border); transition: 0.3s; }
     .status-btn:hover { background: var(--accent); }
 
-    /* מסכי פוקוס ויוטיוב */
+    /* מסכי פוקוס */
     #focusSetup { position: fixed; inset: 0; background: rgba(10, 15, 30, 0.98); z-index: 8000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; backdrop-filter: blur(20px); }
     #timerOverlay { position: fixed; inset: 0; background: #000; z-index: 9000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     #pushNotif { position: fixed; top: 20px; left: 20px; right: 20px; background: var(--accent); color: white; padding: 20px; border-radius: 20px; z-index: 9999; display: none; text-align: center; font-weight: bold; animation: slideDown 0.5s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -100,7 +98,7 @@
         </select>
 
         <label>מוזיקה (לינק יוטיוב - אופציונלי):</label>
-        <input type="text" id="ytUrl" placeholder="הדבק לינק או השאר ריק ללופי">
+        <input type="text" id="ytUrl" placeholder="הדבק לינק או השאר ריק">
 
         <button class="btn-main" style="background:var(--accent); color:white; margin-top:20px;" onclick="startTheClock()">צא לדרך! 🚀</button>
         <button onclick="document.getElementById('focusSetup').style.display='none'" style="background:none; color:white; margin-top:15px; border:none; cursor:pointer;">ביטול</button>
@@ -113,8 +111,8 @@
         <iframe id="ytFrame" width="100%" height="300" src="" frameborder="0" allow="autoplay"></iframe>
     </div>
     <div style="display:flex; gap:15px; margin-top:50px;">
-        <button class="btn-main" style="width:130px; background:#333; color:white; font-size:14px;" onclick="switchTrack()">החלף מוזיקה</button>
-        <button class="btn-main" style="width:130px; background:var(--danger); color:white; font-size:14px;" onclick="closeTimer()">סיימתי / יציאה</button>
+        <button class="btn-main" style="width:140px; background:#333; color:white; font-size:15px;" onclick="changeMusicLink()">🔗 החלף לינק</button>
+        <button class="btn-main" style="width:140px; background:var(--danger); color:white; font-size:15px;" onclick="closeTimer()">סיימתי / יציאה</button>
     </div>
 </div>
 
@@ -127,12 +125,12 @@
     </div>
 
     <div id="taskArea" class="hidden">
-        <div class="stats-bar" id="statsBox">
+        <div class="stats-card" id="statsBox">
             <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
                 <span id="ptsDisplay">💰 0 נקודות</span>
                 <span id="dailyDisplay">🕒 ריכוז יומי: 0/60 דק'</span>
             </div>
-            <div class="progress-bg"><div id="progressBar"></div></div>
+            <div class="progress-track"><div id="progressBar"></div></div>
         </div>
 
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -176,6 +174,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, query, where, onSnapshot, doc, getDocs, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // הקונפיגורציה המקורית שלך
     const firebaseConfig = {
         apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
         authDomain: "tast-7808e.firebaseapp.com",
@@ -190,7 +189,7 @@
 
     let student = "", classCode = "", currentSchedule = {}, focusTimer, selectedMins = 0;
     let isFirstLoad = true;
-    const lofiSongs = ["jfKfPfyJRdk", "n61ULEU7FZ0", "5yx6BWbL1E4", "DWcJFNfaw9c"];
+    const lofiSongs = ["jfKfPfyJRdk", "n61ULEU7FZ0", "5yx6BWbL1E4"];
     let songIdx = 0;
 
     window.enterClass = async () => {
@@ -220,8 +219,6 @@
 
     function loadTasks() {
         onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tSnap) => {
-            
-            // התראה על משימה חדשה
             if(!isFirstLoad) {
                 tSnap.docChanges().forEach(change => {
                     if(change.type === "added") {
@@ -270,7 +267,7 @@
         });
     }
 
-    /* --- לוגיקת פוקוס משופרת --- */
+    /* לוגיקת פוקוס ומוזיקה */
     window.openFocusSetup = () => { document.getElementById('focusSetup').style.display = 'flex'; };
 
     window.startTheClock = () => {
@@ -286,63 +283,55 @@
         display.style.color = color;
         display.style.fontSize = size;
 
-        // טיפול ביוטיוב
-        let vidId = lofiSongs[0];
-        if(yt.includes("v=")) vidId = yt.split("v=")[1].split("&")[0];
-        else if(yt.includes("be/")) vidId = yt.split("be/")[1];
-        document.getElementById('ytFrame').src = `https://www.youtube.com/embed/${vidId}?autoplay=1`;
+        updateYTPlayer(yt);
 
         let totalSeconds = selectedMins * 60;
         focusTimer = setInterval(() => {
             totalSeconds--;
             let m = Math.floor(totalSeconds / 60), s = totalSeconds % 60;
             display.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-            if(totalSeconds <= 0) finishFocusSession();
+            if(totalSeconds <= 0) finishFocus();
         }, 1000);
     };
 
-    function finishFocusSession() {
-        clearInterval(focusTimer);
-        const today = new Date().toLocaleDateString();
-        let currentDayMins = parseInt(localStorage.getItem('f_' + today)) || 0;
-        let points = parseInt(localStorage.getItem('pts')) || 0;
+    window.changeMusicLink = () => {
+        const newUrl = prompt("הדבק לינק חדש מיוטיוב (או השאר ריק למוזיקה הבאה):");
+        if(newUrl !== null) updateYTPlayer(newUrl);
+    };
 
-        currentDayMins += selectedMins;
-        points += (selectedMins * 10);
-
-        localStorage.setItem('f_' + today, currentDayMins);
-        localStorage.setItem('pts', points);
-
-        alert(`כל הכבוד! צברת ${selectedMins * 10} נקודות וריכוז!`);
-        closeTimer();
-        updateStats();
+    function updateYTPlayer(url) {
+        let vidId = "";
+        if(url.includes("v=")) vidId = url.split("v=")[1].split("&")[0];
+        else if(url.includes("be/")) vidId = url.split("be/")[1].split("?")[0];
+        else {
+            vidId = lofiSongs[songIdx];
+            songIdx = (songIdx + 1) % lofiSongs.length;
+        }
+        document.getElementById('ytFrame').src = `https://www.youtube.com/embed/${vidId}?autoplay=1`;
     }
 
-    window.closeTimer = () => {
+    function finishFocus() {
         clearInterval(focusTimer);
-        document.getElementById('timerOverlay').style.display = 'none';
-        document.getElementById('ytFrame').src = "";
-    };
+        const today = new Date().toLocaleDateString();
+        localStorage.setItem('f_' + today, (parseInt(localStorage.getItem('f_' + today)) || 0) + selectedMins);
+        localStorage.setItem('pts', (parseInt(localStorage.getItem('pts')) || 0) + (selectedMins * 10));
+        alert("כל הכבוד! צברת נקודות."); 
+        updateStats();
+        closeTimer();
+    }
 
-    window.switchTrack = () => {
-        songIdx = (songIdx + 1) % lofiSongs.length;
-        document.getElementById('ytFrame').src = `https://www.youtube.com/embed/${lofiSongs[songIdx]}?autoplay=1`;
-    };
+    window.closeTimer = () => { clearInterval(focusTimer); document.getElementById('timerOverlay').style.display = 'none'; document.getElementById('ytFrame').src = ""; };
 
     function updateStats() {
         const today = new Date().toLocaleDateString();
         const f = parseInt(localStorage.getItem('f_' + today)) || 0;
         const p = localStorage.getItem('pts') || 0;
-        
         document.getElementById('ptsDisplay').innerText = `💰 ${p} נקודות`;
         document.getElementById('dailyDisplay').innerText = `🕒 ריכוז: ${f}/60 דק'`;
-        
-        const pct = Math.min((f / 60) * 100, 100);
-        document.getElementById('progressBar').style.width = pct + "%";
-        if(f >= 60) document.getElementById('statsBox').classList.add('gold-status');
+        document.getElementById('progressBar').style.width = Math.min((f/60)*100, 100) + "%";
     }
 
-    /* --- פונקציות מקוריות שנשארו ללא שינוי --- */
+    /* הפונקציות המקוריות שלך שנשמרו */
     window.showSchedule = () => {
         const container = document.getElementById('scheduleContainer');
         const days = [" ראשון ", " שני ", " שלישי ", " רביעי ", " חמישי "];
@@ -360,9 +349,7 @@
         const inp = document.createElement('input'); inp.type = 'file'; inp.multiple = true;
         inp.onchange = async (e) => {
             const files = Array.from(e.target.files);
-            const b64 = await Promise.all(files.map(f => new Promise(res => { 
-                const r = new FileReader(); r.onload = ev => res(ev.target.result); r.readAsDataURL(f); 
-            })));
+            const b64 = await Promise.all(files.map(f => new Promise(res => { const r = new FileReader(); r.onload = ev => res(ev.target.result); r.readAsDataURL(f); })));
             await updateDoc(doc(db, "tasks", id), { worksheets: b64, worksheetBy: student });
             alert(" הדפים הועלו !");
         };
@@ -379,18 +366,8 @@
     window.deleteWS = async (id) => { if(confirm(" למחוק דפים שלך ?")) await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null }); };
     window.toggleTask = async (tid, isDone) => { await setDoc(doc(db, "submissions", student + "_" + tid), { studentName: student, taskId: tid, completed: !isDone, classCode: classCode }); };
     window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'block'; };
-    
     window.logout = () => { localStorage.clear(); location.reload(); };
-
-    window.onload = () => { 
-        const n = localStorage.getItem('studentName');
-        const c = localStorage.getItem('classCode');
-        if(n && c) {
-            document.getElementById('studentName').value = n;
-            document.getElementById('classCode').value = c;
-            enterClass();
-        }
-    };
+    window.onload = () => { if(localStorage.getItem('studentName')) enterClass(); };
 </script>
 </body>
 </html>
