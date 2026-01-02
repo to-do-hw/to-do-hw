@@ -1,313 +1,282 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>משימות תלמידים - הגרסה המלאה והמשודרגת</title>
-    <style>
-        /* הגדרות בסיס וצבעים */
-        :root {
-            --primary: #10b981;
-            --accent: #3b82f6;
-            --danger: #ef4444;
-            --dark-bg: #0f172a;
-            --glass: rgba(255, 255, 255, 0.12);
-            --glass-border: rgba(255, 255, 255, 0.25);
-            --modal-bg: rgba(15, 23, 42, 0.95);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title> ראלי מטו"ס - ממשק תלמידים מלא </title>
+<style>
+:root {
+--bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
+--glass: rgba(255, 255, 255, 0.12);
+--glass-border: rgba(255, 255, 255, 0.25);
+--accent: #10b981;
+--danger: #ef4444;
+--sun-color: #fbbf24; --mon-color: #f87171; --tue-color: #34d399; --wed-color: #60a5fa; --thu-color: #c084fc;
+}
 
-        /* אנימציות */
-        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+body {
+font-family: -apple-system, system-ui, sans-serif;
+margin: 0; padding: 15px; direction: rtl; min-height: 100vh;
+display: flex; justify-content: center;
+background: var(--bg-gradient); background-size: 400% 400%;
+animation: gradientMove 15s ease infinite; color: white; overflow-x: hidden;
+}
 
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
-            margin: 0; padding: 0; direction: rtl; min-height: 100vh; color: white;
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
-            background-size: 400% 400%; animation: gradientMove 12s ease infinite;
-            -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
-        }
+@keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
-        /* כותרת האפליקציה */
-        .header {
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            padding: calc(env(safe-area-inset-top) + 20px) 20px 20px 20px;
-            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--glass-border);
-            text-align: center; box-shadow: 0 4px 30px rgba(0,0,0,0.2);
-        }
+.main-container { width: 100%; max-width: 500px; z-index: 1; }
+.glass-panel { background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 35px; padding: 30px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); animation: scaleIn 0.5s ease-out; }
 
-        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+input { width: 100%; padding: 20px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1); border: 2px solid transparent; border-radius: 20px; color: white; font-size: 18px; box-sizing: border-box; outline: none; transition: 0.3s; }
+input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.2); }
 
-        /* כרטיסים ועיצוב כללי */
-        .card {
-            background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
-            border-radius: 30px; padding: 25px; margin-bottom: 20px; animation: fadeInUp 0.5s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
+.btn-main { width: 100%; padding: 20px; border-radius: 20px; border: none; background: white; color: #1e3a8a; font-weight: 900; font-size: 19px; cursor: pointer; transition: 0.3s; }
+.btn-main:active { transform: scale(0.96); }
 
-        input {
-            width: 100%; padding: 18px; margin: 15px 0; border-radius: 15px;
-            border: 1px solid var(--glass-border); background: rgba(0,0,0,0.3);
-            color: white; font-size: 16px; outline: none; box-sizing: border-box;
-            transition: 0.3s; text-align: center;
-        }
-        input:focus { border-color: var(--primary); background: rgba(0,0,0,0.5); }
+.schedule-btn-ui { background: rgba(255,255,255,0.15); border: 1px solid var(--glass-border); padding: 12px 20px; border-radius: 18px; cursor: pointer; font-weight: bold; animation: pulse 2s infinite; text-align: center; }
 
-        button { 
-            width: 100%; padding: 18px; border-radius: 15px; border: none; 
-            font-weight: 800; cursor: pointer; transition: 0.3s; 
-            background: white; color: #1e3a8a; font-size: 17px;
-        }
-        button:active { transform: scale(0.97); }
+.task-card { background: rgba(255, 255, 255, 0.15); border: 1px solid var(--glass-border); border-radius: 25px; padding: 22px; margin-bottom: 20px; position: relative; animation: fadeInUp 0.6s ease-out backwards; transition: 0.3s; }
+.ws-controls { position: absolute; top: 18px; left: 18px; display: flex; gap: 8px; z-index: 10; }
+.ws-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid var(--glass-border); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-        /* עיצוב המשימות */
-        .task-card {
-            background: rgba(255,255,255,0.07); border-radius: 25px; padding: 22px;
-            margin-bottom: 15px; border-right: 6px solid var(--primary);
-            position: relative; animation: fadeInUp 0.4s ease;
-        }
+.task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; }
+.task-date { font-size: 13px; color: #a7f3d0; margin-bottom: 15px; display: block; font-weight: 600; }
+.task-img { width: 100%; border-radius: 20px; margin-bottom: 15px; cursor: zoom-in; }
 
-        .task-title { font-size: 22px; font-weight: 800; display: block; margin-bottom: 8px; color: #fff; }
-        .task-date { font-size: 14px; opacity: 0.8; display: block; margin-bottom: 12px; }
+.status-btn { padding: 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.08); text-align: center; font-weight: 800; cursor: pointer; border: 1px solid var(--glass-border); transition: 0.3s; }
+.status-btn:hover { background: var(--accent); }
 
-        .task-img {
-            width: 100%; max-height: 450px; object-fit: contain; border-radius: 18px;
-            margin-top: 15px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
-        }
+/* --- תוספות פוקוס והתראות --- */
+.focus-mini-btn { background: var(--wed-color); padding: 8px 15px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-top: 10px; cursor: pointer; display: inline-block; }
+#timerOverlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+#pushNotif { position: fixed; top: 20px; left: 20px; right: 20px; background: var(--accent); color: white; padding: 15px; border-radius: 20px; z-index: 6000; display: none; animation: slideIn 0.5s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: bold; text-align: center; }
+@keyframes slideIn { from { transform: translateY(-100px); } to { transform: translateY(0); } }
+/* -------------------------- */
 
-        /* כפתור פוקוס ייחודי */
-        .focus-btn {
-            background: var(--accent); color: white; border: none; padding: 12px 20px;
-            border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 15px;
-            display: inline-flex; align-items: center; gap: 10px; font-size: 15px;
-            width: auto;
-        }
-        .focus-btn:hover { background: #2563eb; }
+.modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); padding: 30px 15px; overflow-y: auto; }
+.modal-content { width: 100%; max-width: 450px; margin: 0 auto; animation: scaleIn 0.4s ease-out; }
 
-        /* הודעת התראה Push מעוצבת */
-        #pushNotification {
-            position: fixed; top: 20px; left: 20px; right: 20px; 
-            background: var(--primary); color: white; padding: 18px 25px;
-            border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            display: none; align-items: center; justify-content: space-between;
-            z-index: 10001; animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            font-weight: bold; border: 1px solid rgba(255,255,255,0.3);
-        }
+.day-box { background: rgba(255, 255, 255, 0.07); border-radius: 22px; padding: 18px; margin-bottom: 12px; border-right: 6px solid white; }
+.day-box.sun { border-color: var(--sun-color); }
+.day-box.mon { border-color: var(--mon-color); }
+.day-box.tue { border-color: var(--tue-color); }
+.day-box.wed { border-color: var(--wed-color); }
+.day-box.thu { border-color: var(--thu-color); }
 
-        /* מסך טיימר פוקוס מלא */
-        #timerOverlay {
-            position: fixed; inset: 0; background: var(--modal-bg);
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10002; backdrop-filter: blur(15px); text-align: center; padding: 30px;
-        }
-        #timerDisplay { 
-            font-size: 100px; font-weight: 900; margin: 20px 0; 
-            font-variant-numeric: tabular-nums; text-shadow: 0 0 30px var(--accent);
-        }
-        .timer-title { font-size: 28px; margin-bottom: 10px; color: var(--accent); }
-        .stop-timer-btn {
-            background: var(--danger); color: white; padding: 18px 40px;
-            border-radius: 20px; font-size: 18px; font-weight: bold; margin-top: 40px;
-        }
-
-        .hidden { display: none; }
-        .logout-link { font-size: 13px; opacity: 0.6; margin-top: 12px; cursor: pointer; text-decoration: underline; display: inline-block; }
-    </style>
+.hidden { display: none; }
+</style>
 </head>
 <body>
 
-<div id="pushNotification">
-    <div style="display:flex; align-items:center; gap:12px;">
-        <span style="font-size:24px;">📝</span>
-        <span id="pushMsg">משימה חדשה נוספה לכיתה שלך!</span>
-    </div>
-    <button onclick="this.parentElement.style.display='none'" style="background:none; color:white; font-size:22px; padding:0; width:auto;">✕</button>
-</div>
+<div id="pushNotif">🔔 משימה חדשה התווספה לכיתה!</div>
 
 <div id="timerOverlay">
-    <div class="timer-title" id="focusTaskTitle">עובדים בריכוז</div>
-    <div id="timerDisplay">25:00</div>
-    <p style="font-size: 18px; opacity: 0.8; max-width: 300px;">זה הזמן להניח את הטלפון בצד ולהתרכז בדף העבודה.</p>
-    
-    <div style="margin-top: 20px; opacity: 0.5;">
-        <small>🎵 מוזיקת רקע מופעלת...</small>
-        <iframe id="lofiPlayer" width="1" height="1" src="" frameborder="0" allow="autoplay"></iframe>
-    </div>
-
-    <button class="stop-timer-btn" onclick="stopFocus()">הפסק ריכוז וחזור</button>
+    <div style="font-size: 80px; font-weight: 900; margin-bottom: 20px;" id="timerClock">25:00</div>
+    <div style="font-size: 18px; opacity: 0.8; margin-bottom: 40px;">זמן להתרכז במשימה...</div>
+    <button class="btn-main" style="max-width: 200px;" onclick="stopFocus()">הפסק</button>
 </div>
 
-<div id="loginArea" class="container" style="padding-top: 18vh;">
-    <div class="card" style="text-align: center;">
-        <h1 style="margin: 0 0 10px 0;">שלום תלמיד 👋</h1>
-        <p style="opacity: 0.8; margin-bottom: 30px;">הזן קוד כיתה כדי לצפות במשימות</p>
-        <input type="text" id="classCode" placeholder="קוד כיתה (למשל: AB123)" autocomplete="off">
-        <button onclick="login()">כניסה למערכת</button>
-    </div>
+<div class="main-container">
+<div id="loginArea" class="glass-panel">
+<h2 style="text-align:center; font-size: 32px; margin-bottom: 10px;"> היי חבר 👋</h2>
+<input type="text" id="studentName" placeholder=" שם מלא ">
+<input type="text" id="classCode" placeholder=" קוד כיתה ">
+<button class="btn-main" onclick="enterClass()"> כניסה למערכת </button>
 </div>
 
-<div id="mainApp" class="hidden">
-    <div class="header">
-        <h2 id="classTitle" style="margin:0; font-size: 26px;"></h2>
-        <span class="logout-link" onclick="logout()">החלף כיתה ➔</span>
-    </div>
-    <div class="container" id="taskList">
-        </div>
+<div id="taskArea" class="hidden">
+<div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+<div id="helloName" style="font-size: 28px; font-weight: 900;"></div>
+<div style="text-align:left;">
+<div style="font-size: 13px; opacity: 0.5; cursor: pointer; margin-bottom: 8px;" onclick="logout()"> התנתקות </div>
+<div class="schedule-btn-ui" onclick="showSchedule()">📅 מערכת </div>
+</div>
+</div>
+
+<div id="activeTasks"></div>
+
+<div id="archiveWrapper" class="hidden">
+<div style="font-size: 15px; opacity: 0.8; margin: 45px 0 15px; font-weight: 800; border-right: 4px solid var(--accent); padding-right: 12px;"> משימות שהושלמו ✅</div>
+<div id="archivedTasks" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"></div>
+</div>
+</div>
+</div>
+
+<div id="scheduleModal" class="modal" onclick="this.style.display='none'">
+<div class="modal-content" onclick="event.stopPropagation();">
+<h2 style="text-align:center; margin-bottom:25px;">📅 מערכת שעות </h2>
+<div id="scheduleContainer"></div>
+<button class="btn-main" style="margin-top:20px; font-size:16px;" onclick="document.getElementById('scheduleModal').style.display='none'"> סגור </button>
+</div>
+</div>
+
+<div id="wsViewModal" class="modal" onclick="this.style.display='none'">
+<div class="modal-content" onclick="event.stopPropagation();">
+<h3 style="text-align:center;">📄 דפי עבודה </h3>
+<div id="wsGrid" style="display:grid; gap:15px;"></div>
+<button class="btn-main" style="margin-top:20px;" onclick="document.getElementById('wsViewModal').style.display='none'"> סגור </button>
+</div>
+</div>
+
+<div id="imgModal" class="modal" onclick="this.style.display='none'">
+<div class="modal-content"><img id="modalImg" src="" style="width:100%; border-radius:30px;"></div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, query, where, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, query, where, onSnapshot, doc, getDocs, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
-        authDomain: "tast-7808e.firebaseapp.com",
-        projectId: "tast-7808e",
-        storageBucket: "tast-7808e.firebasestorage.app",
-        messagingSenderId: "99024860024",
-        appId: "1:99024860024:web:24ab70c10254a2014fce8d"
-    };
+const firebaseConfig = {
+apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
+authDomain: "tast-7808e.firebaseapp.com",
+projectId: "tast-7808e",
+storageBucket: "tast-7808e.firebasestorage.app",
+messagingSenderId: "99024860024",
+appId: "1:99024860024:web:24ab70c10254a2014fce8d"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    let currentCode = "";
-    let focusInterval;
-    let isInitialLoad = true;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+let student = "", classCode = "", currentSchedule = {};
+let focusTimer;
+let initialLoad = true;
 
-    // התחברות
-    window.login = async () => {
-        const input = document.getElementById('classCode');
-        const code = input.value.toUpperCase().trim();
-        if(!code) return;
+window.enterClass = async () => {
+student = document.getElementById('studentName').value.trim();
+classCode = document.getElementById('classCode').value.trim().toUpperCase();
+if(!student || !classCode) return;
 
-        try {
-            const q = query(collection(db, "classes"), where("code", "==", code));
-            const snap = await getDocs(q);
+const snap = await getDocs(query(collection(db, "classes"), where("code", "==", classCode)));
+if(snap.empty) return alert(" קוד כיתה שגוי ");
 
-            if(snap.empty) {
-                alert("קוד כיתה לא נמצא.");
-                return;
-            }
+currentSchedule = snap.docs[0].data().schedule || {};
+localStorage.setItem('studentName', student);
+localStorage.setItem('classCode', classCode);
 
-            currentCode = code;
-            localStorage.setItem('studentClass', code);
-            
-            const classData = snap.docs[0].data();
-            document.getElementById('classTitle').innerText = "כיתה: " + classData.name;
-            document.getElementById('loginArea').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            
-            startTaskListener();
-        } catch (error) {
-            console.error(error);
-            alert("שגיאת חיבור.");
-        }
-    };
+document.getElementById('loginArea').classList.add('hidden');
+document.getElementById('taskArea').classList.remove('hidden');
+document.getElementById('helloName').innerText = " היי " + student;
 
-    // האזנה למשימות בזמן אמת + התראות Push
-    function startTaskListener() {
-        const q = query(collection(db, "tasks"), where("classCode", "==", currentCode));
-        
-        onSnapshot(q, (snap) => {
-            // זיהוי משימה חדשה להתראה
-            if (!isInitialLoad && !snap.metadata.hasPendingWrites) {
-                snap.docChanges().forEach(change => {
-                    if (change.type === "added") {
-                        showPushNotification("נוספה משימה חדשה: " + change.doc.data().title);
-                    }
-                });
-            }
-            isInitialLoad = false;
+// הודעת עדכון פעם אחת בלבד
+if(!localStorage.getItem('sawUpdate')) {
+    alert("חדש! מהיום תוכלו להעלות דפי עבודה משלכם למשימות ולהשתמש בטיימר פוקוס ⏱️");
+    localStorage.setItem('sawUpdate', 'true');
+}
 
-            const list = document.getElementById('taskList');
-            list.innerHTML = "";
-            
-            if(snap.empty) {
-                list.innerHTML = "<div class='card' style='text-align:center;'>אין משימות פעילות 🎉</div>";
-                return;
-            }
+updateActivity();
+loadTasks();
+};
 
-            const tasks = [];
-            snap.forEach(doc => tasks.push({id: doc.id, ...doc.data()}));
-            tasks.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+function updateActivity() {
+setDoc(doc(db, "activity", student + "_" + classCode), { name: student, classCode: classCode, lastSeen: serverTimestamp() }, { merge: true });
+}
 
-            tasks.forEach(t => {
-                const date = new Date(t.endTime).toLocaleString('he-IL', {
-                    day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'
-                });
-                
-                const imgSrc = t.fileData || t.imageUrl || t.image;
-                const imgHtml = imgSrc ? `<img src="${imgSrc}" class="task-img">` : '';
-
-                list.innerHTML += `
-                    <div class="task-card">
-                        <span class="task-title">${t.title}</span>
-                        <span class="task-date">📅 הגשה עד: ${date}</span>
-                        ${imgHtml}
-                        <button class="focus-btn" onclick="startFocusMode('${t.title.replace(/'/g, "\\'")}')">
-                            ⏱️ התחל ריכוז (25 דק')
-                        </button>
-                    </div>
-                `;
-            });
-        });
+function loadTasks() {
+onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tSnap) => {
+    // התראת Push על משימה חדשה
+    if(!initialLoad) {
+        document.getElementById('pushNotif').style.display = 'block';
+        setTimeout(() => document.getElementById('pushNotif').style.display = 'none', 4000);
     }
+    initialLoad = false;
 
-    // פונקציות טיימר פוקוס
-    window.startFocusMode = (taskName) => {
-        document.getElementById('focusTaskTitle').innerText = taskName;
-        document.getElementById('timerOverlay').style.display = 'flex';
-        // נגן מוזיקה (YouTube נסתר לריכוז)
-        document.getElementById('lofiPlayer').src = "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&controls=0";
+    onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student)), (sSnap) => {
+    const done = {}; sSnap.forEach(d => { if(d.data().completed) done[d.data().taskId] = true; });
+    const act = document.getElementById('activeTasks'), arc = document.getElementById('archivedTasks');
+    act.innerHTML = ''; arc.innerHTML = '';
 
-        let time = 25 * 60;
-        const display = document.getElementById('timerDisplay');
+    let tasks = []; tSnap.forEach(d => tasks.push({id: d.id, ...d.data()}));
+    tasks.sort((a,b) => a.endTime - b.endTime);
 
-        focusInterval = setInterval(() => {
-            let mins = Math.floor(time / 60);
-            let secs = time % 60;
-            display.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            
-            if (--time < 0) {
-                clearInterval(focusInterval);
-                alert("כל הכבוד! סיימת 25 דקות של ריכוז מלא.");
-                stopFocus();
-            }
-        }, 1000);
-    };
-
-    window.stopFocus = () => {
-        clearInterval(focusInterval);
-        document.getElementById('timerOverlay').style.display = 'none';
-        document.getElementById('lofiPlayer').src = "";
-        document.getElementById('timerDisplay').innerText = "25:00";
-    };
-
-    // פונקציית התראה
-    function showPushNotification(msg) {
-        const el = document.getElementById('pushNotification');
-        document.getElementById('pushMsg').innerText = msg;
-        el.style.display = 'flex';
-        setTimeout(() => { el.style.display = 'none'; }, 6000);
+    tasks.forEach((t, index) => {
+    const delay = index * 0.12;
+    if(done[t.id]) {
+    arc.innerHTML += `<div class="task-card" style="padding:15px; text-align:center; animation-delay:${delay}s">
+    <div style="font-weight:bold; margin-bottom:5px;">${t.title}</div>
+    <div style="color:var(--accent); cursor:pointer; font-size:12px;" onclick="toggleTask('${t.id}', true)"> החזר למשימות </div>
+    </div>`;
+    } else {
+    const hasWS = t.worksheets && t.worksheets.length > 0;
+    act.innerHTML += `<div class="task-card" style="animation-delay: ${delay}s">
+    <div class="ws-controls">
+    <div class="ws-btn" onclick="triggerUpload('${t.id}')">📄+</div>
+    ${hasWS ? `<div class="ws-btn" onclick="viewWS('${t.id}')">👁️</div>` : ''}
+    ${hasWS && t.worksheetBy === student ? `<div class="ws-btn" style="color:var(--danger)" onclick="deleteWS('${t.id}')">🗑️</div>` : ''}
+    </div>
+    <div class="task-title">${t.title}</div>
+    <div class="task-date">🕒 להגשה עד : ${new Date(t.endTime).toLocaleString('he-IL')}</div>
+    ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="zoom('${t.imageUrl}')">` : ''}
+    <div class="status-btn" onclick="toggleTask('${t.id}', false )">⬜ סמן שסיימתי </div>
+    <div class="focus-mini-btn" onclick="startFocus()">⏱️ פוקוס</div>
+    </div>`;
     }
+    });
+    document.getElementById('archiveWrapper').classList.toggle('hidden', arc.innerHTML === '');
+    });
+});
+}
 
-    window.logout = () => {
-        if(confirm("להתנתק?")) {
-            localStorage.removeItem('studentClass');
-            location.reload();
-        }
-    };
+window.startFocus = () => {
+    document.getElementById('timerOverlay').style.display = 'flex';
+    let time = 25 * 60;
+    focusTimer = setInterval(() => {
+        time--;
+        let m = Math.floor(time / 60), s = time % 60;
+        document.getElementById('timerClock').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        if(time <= 0) stopFocus();
+    }, 1000);
+};
+window.stopFocus = () => { clearInterval(focusTimer); document.getElementById('timerOverlay').style.display = 'none'; };
 
-    window.onload = () => {
-        const savedCode = localStorage.getItem('studentClass');
-        if(savedCode) {
-            document.getElementById('classCode').value = savedCode;
-            window.login();
-        }
-    };
+window.showSchedule = () => {
+const container = document.getElementById('scheduleContainer');
+const days = [" ראשון ", " שני ", " שלישי ", " רביעי ", " חמישי "];
+const colors = ["sun", "mon", "tue", "wed", "thu"];
+container.innerHTML = days.map((day, i) => {
+const lessons = currentSchedule[`day${i}`] || [];
+return `<div class="day-box ${colors[i]}"><strong> יום ${day}</strong>
+${lessons.map(l => `<div style="display:flex; justify-content:space-between; font-size:14px; margin-top:5px;"><span>${l.subject}</span><span>${l.time}</span></div>`).join('')}
+</div>`;
+}).join('');
+document.getElementById('scheduleModal').style.display = 'block';
+};
+
+window.triggerUpload = (id) => {
+const inp = document.createElement('input'); inp.type = 'file'; inp.multiple = true;
+inp.onchange = async (e) => {
+const files = Array.from(e.target.files);
+const b64 = await Promise.all(files.map(f => new Promise(res => { const r = new FileReader(); r.onload = ev => res(ev.target.result); r.readAsDataURL(f); })));
+await updateDoc(doc(db, "tasks", id), { worksheets: b64, worksheetBy: student });
+alert(" הדפים הועלו !");
+};
+inp.click();
+};
+
+window.viewWS = async (id) => {
+const d = await getDocs(collection(db, "tasks"));
+const t = d.docs.find(doc => doc.id === id).data();
+document.getElementById('wsGrid').innerHTML = t.worksheets.map(img => `<img src="${img}" style="width:100%; border-radius:15px;">`).join('');
+document.getElementById('wsViewModal').style.display = 'block';
+};
+
+window.deleteWS = async (id) => { if(confirm(" למחוק דפים שלך ?")) await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null }); };
+window.toggleTask = async (tid, isDone) => { await setDoc(doc(db, "submissions", student + "_" + tid), { studentName: student, taskId: tid, completed: !isDone, classCode: classCode }); };
+window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'block'; };
+
+window.logout = () => { localStorage.clear(); location.reload(); };
+
+window.onload = () => {
+const n = localStorage.getItem('studentName');
+const c = localStorage.getItem('classCode');
+if(n && c) {
+document.getElementById('studentName').value = n;
+document.getElementById('classCode').value = c;
+enterClass();
+}
+};
 </script>
 </body>
 </html>
