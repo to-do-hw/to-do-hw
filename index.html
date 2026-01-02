@@ -1,157 +1,430 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
- <title> ראלי מטו"ס - ממשק תלמידים מלא </title>
-<style>
-    :root {
-        --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
-        --glass: rgba(255, 255, 255, 0.12);
-        --glass-border: rgba(255, 255, 255, 0.25);
-        --accent: #10b981;
-        --danger: #ef4444;
-        --sun-color: #fbbf24; --mon-color: #f87171; --tue-color: #34d399; --wed-color: #60a5fa; --thu-color: #c084fc;
-    }
-
-    body {
-        font-family: -apple-system, system-ui, sans-serif;
-        margin: 0; padding: 15px; direction: rtl; min-height: 100vh;
-        display: flex; justify-content: center;
-        background: var(--bg-gradient); background-size: 400% 400%;
-        animation: gradientMove 15s ease infinite; color: white; overflow-x: hidden;
-    }
-
-    @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    .main-container { width: 100%; max-width: 500px; z-index: 1; }
-    .glass-panel { background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 35px; padding: 30px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); animation: scaleIn 0.5s ease-out; }
-
-    /* מערכת ניקוד */
-    .stats-header { background: rgba(0,0,0,0.2); border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
-    .progress-track { background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
-    #progressBar { background: var(--accent); height: 100%; width: 0%; transition: 1s ease; }
-
-    input, select { width: 100%; padding: 20px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1); border: 2px solid transparent; border-radius: 20px; color: white; font-size: 18px; box-sizing: border-box; outline: none; transition: 0.3s; }
-    input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.2); }
-
-    .btn-main { width: 100%; padding: 20px; border-radius: 20px; border: none; background: white; color: #1e3a8a; font-weight: 900; font-size: 19px; cursor: pointer; transition: 0.3s; }
-    .btn-main:active { transform: scale(0.96); }
-
-    .task-card { background: rgba(255, 255, 255, 0.15); border: 1px solid var(--glass-border); border-radius: 25px; padding: 22px; margin-bottom: 20px; position: relative; animation: fadeInUp 0.6s ease-out backwards; }
-    .task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; }
-    .task-date { font-size: 13px; color: #a7f3d0; margin-bottom: 15px; display: block; }
-    .task-img { width: 100%; border-radius: 20px; margin-bottom: 15px; cursor: zoom-in; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-
-    .ws-controls { position: absolute; top: 18px; left: 18px; display: flex; gap: 8px; z-index: 10; }
-    .ws-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid var(--glass-border); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-    .ws-btn:hover { background: rgba(255,255,255,0.4); }
-
-    /* מסכי פוקוס ויוטיוב מוטמע */
-    #focusSetup { position: fixed; inset: 0; background: rgba(10, 15, 30, 0.98); z-index: 8000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; backdrop-filter: blur(20px); }
-    #timerOverlay { position: fixed; inset: 0; background: #000; z-index: 9000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ראלי מטו"ס - ממשק תלמידים מלא</title>
     
-    /* דפדפן יוטיוב ענק - 80% מגובה המסך */
-    #ytBrowser { width: 100%; max-width: 1000px; height: 75vh; border-radius: 30px; overflow: hidden; border: 2px solid var(--glass-border); box-shadow: 0 0 50px rgba(0,0,0,1); margin-top: 15px; background: #000; }
+    <style>
+        /* הגדרות צבעים ומשתנים גלובליים */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
+            --glass: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.25);
+            --accent: #10b981;
+            --danger: #ef4444;
+            --text-main: #ffffff;
+            
+            /* צבעי מערכת שעות לפי ימים */
+            --sun-color: #fbbf24; 
+            --mon-color: #f87171; 
+            --tue-color: #34d399; 
+            --wed-color: #60a5fa; 
+            --thu-color: #c084fc;
+        }
 
-    .modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); padding: 30px 15px; overflow-y: auto; }
-    .modal-content { width: 100%; max-width: 450px; margin: 0 auto; animation: scaleIn 0.4s ease-out; }
-    
-    /* עיצוב מערכת השעות המקורי */
-    .day-box { background: rgba(255, 255, 255, 0.07); border-radius: 22px; padding: 18px; margin-bottom: 15px; border-right: 8px solid white; transition: 0.3s; }
-    .day-box:hover { background: rgba(255,255,255,0.12); transform: translateX(-5px); }
-    .day-box.sun { border-color: var(--sun-color); }
-    .day-box.mon { border-color: var(--mon-color); }
-    .day-box.tue { border-color: var(--tue-color); }
-    .day-box.wed { border-color: var(--wed-color); }
-    .day-box.thu { border-color: var(--thu-color); }
-    
-    .hidden { display: none; }
-    
-    /* רשימת משימות שהושלמו */
-    #archivedTasks .task-card { opacity: 0.7; transform: scale(0.95); }
-</style>
+        /* עיצוב כללי של הדף */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 15px;
+            direction: rtl;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* אנימציית רקע זז */
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* אנימציות כניסה לאלמנטים */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* מכולה מרכזית */
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+            z-index: 1;
+            margin-top: env(safe-area-inset-top);
+        }
+
+        /* פאנל זכוכית */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 35px;
+            padding: 35px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        /* עיצוב כותרות וטקסט */
+        h1, h2, h3 { margin: 0; padding-bottom: 10px; }
+        
+        /* אזור סטטיסטיקה וניקוד */
+        .stats-header {
+            background: rgba(0,0,0,0.25);
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .progress-track {
+            background: rgba(255,255,255,0.1);
+            height: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        #progressBar {
+            background: linear-gradient(90deg, #10b981, #34d399);
+            height: 100%;
+            width: 0%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* עיצוב שדות קלט */
+        input, select {
+            width: 100%;
+            padding: 22px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: white;
+            font-size: 18px;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* עיצוב כפתורים */
+        .btn-main {
+            width: 100%;
+            padding: 22px;
+            border-radius: 20px;
+            border: none;
+            background: #ffffff;
+            color: #1e3a8a;
+            font-weight: 900;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-main:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        .btn-main:active {
+            transform: scale(0.97);
+        }
+
+        /* עיצוב כרטיסיית משימה */
+        .task-card {
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            animation: fadeInUp 0.6s ease-out backwards;
+            transition: transform 0.3s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .task-title {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .task-date {
+            font-size: 14px;
+            color: #a7f3d0;
+            margin-bottom: 15px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .task-img {
+            width: 100%;
+            border-radius: 22px;
+            margin-bottom: 20px;
+            cursor: zoom-in;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+            transition: opacity 0.3s;
+        }
+
+        .task-img:hover { opacity: 0.9; }
+
+        /* כפתורי שליטה בדפי עבודה */
+        .ws-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .ws-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 18px;
+        }
+
+        .ws-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* עיצוב מסך ריכוז וטיימר */
+        #focusSetup {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 15, 30, 0.98);
+            z-index: 8000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            backdrop-filter: blur(25px);
+        }
+
+        #timerOverlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+     /* עיצוב דפדפן היוטיוב המובנה */
+        #ytBrowser {
+            width: 100%;
+            max-width: 900px;
+            height: 65vh;
+            border-radius: 35px;
+            overflow: hidden;
+            border: 2px solid var(--glass-border);
+            box-shadow: 0 0 60px rgba(0,0,0,1);
+            margin-top: 20px;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        /* שורת החיפוש בתוך הנגן */
+        .yt-search-bar {
+            display: flex;
+            gap: 8px;
+            padding: 15px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .yt-search-bar input {
+            margin-bottom: 0;
+            padding: 12px 20px;
+            font-size: 15px;
+            height: 45px;
+            border-radius: 12px;
+            background: #2a2a2a;
+        }
+
+        .yt-search-bar button {
+            width: 80px;
+            height: 45px;
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        /* עיצוב המודלים (חלונות קופצים) */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(15, 23, 42, 0.94);
+            backdrop-filter: blur(25px);
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        /* עיצוב כרטיסיות ימים במערכת השעות */
+        .day-box {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 25px;
+            padding: 22px;
+            margin-bottom: 18px;
+            border-right: 10px solid white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            transition: 0.3s ease;
+        }
+
+        .day-box:hover { transform: scale(1.02); background: rgba(255,255,255,0.12); }
+        .day-box.sun { border-color: var(--sun-color); }
+        .day-box.mon { border-color: var(--mon-color); }
+        .day-box.tue { border-color: var(--tue-color); }
+        .day-box.wed { border-color: var(--wed-color); }
+        .day-box.thu { border-color: var(--thu-color); }
+        
+        .lesson-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
 
 <div id="focusSetup">
-    <h2 style="font-size: 32px; margin-bottom: 25px;">⚡ הגדרת זמן ריכוז</h2>
-    <div style="width: 100%; max-width: 350px;">
-        <label>כמה דקות להתרכז?</label>
-        <input type="number" id="focusTimeVal" value="25">
+    <h1 style="font-size: 36px; margin-bottom: 10px;">⚡ Focus Mode</h1>
+    <p style="opacity: 0.7; margin-bottom: 30px;">הגדר זמן ללמידה שקטה ומוזיקה</p>
+    
+    <div style="width: 100%; max-width: 380px;">
+        <label style="display:block; margin-bottom:8px; font-weight:bold;">כמה דקות תרצה להתרכז?</label>
+        <input type="number" id="focusTimeVal" value="25" min="1" max="120">
         
-        <label>צבע שעון:</label>
+        <label style="display:block; margin-bottom:8px; font-weight:bold;">בחר צבע לשעון:</label>
         <select id="timerColorChoice">
-            <option value="#ffffff">לבן בוהק</option>
-            <option value="#60a5fa">כחול שמיים</option>
-            <option value="#10b981">ירוק ברקת</option>
-            <option value="#fbbf24">זהב</option>
+            <option value="#ffffff">לבן קלאסי</option>
+            <option value="#60a5fa">כחול מרגיע</option>
+            <option value="#10b981">ירוק ריכוז</option>
+            <option value="#fbbf24">צהוב אנרגטי</option>
         </select>
-
-        <button class="btn-main" style="background:var(--accent); color:white;" onclick="startFocusSession()">צא לדרך! 🚀</button>
-        <button onclick="document.getElementById('focusSetup').style.display='none'" style="background:none; color:white; margin-top:15px; border:none; cursor:pointer; width:100%;">ביטול</button>
+        
+        <button class="btn-main" style="background:var(--accent); color:white; margin-top:10px;" onclick="startFocusSession()">התחל סשן למידה 🚀</button>
+        <button onclick="document.getElementById('focusSetup').style.display='none'" style="background:none; color:white; border:none; cursor:pointer; width:100%; margin-top:20px; font-size:16px; opacity:0.6;">חזור למשימות</button>
     </div>
 </div>
 
 <div id="timerOverlay">
-    <div id="countdownTimer" style="font-weight: 900; font-size: 80px; text-shadow: 0 0 25px rgba(255,255,255,0.3);">00:00</div>
+    <div id="countdownTimer" style="font-weight: 900; font-size: 95px; letter-spacing: -2px; margin-bottom: 10px;">00:00</div>
     
-    <div id="ytBrowser" style="display: flex; flex-direction: column; background: #000;">
-        <div style="display: flex; gap: 5px; padding: 10px; background: rgba(255,255,255,0.1);">
-            <input type="text" id="ytSearchInput" placeholder="חפש מוזיקה לריכוז..." style="margin:0; padding:10px; font-size:14px; flex:1; height:40px; border-radius:10px;">
-            <button onclick="searchYoutube()" style="width:70px; height:40px; background:var(--accent); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">חפש</button>
+    <div id="ytBrowser">
+        <div class="yt-search-bar">
+            <input type="text" id="ytSearchInput" placeholder="חפש שיר, פלייליסט או Lofi...">
+            <button onclick="searchYoutube()">חפש 🔍</button>
         </div>
-        
         <iframe id="ytIframe" width="100%" height="100%" src="https://www.youtube.com/embed?source=search" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; clipboard-write" allowfullscreen></iframe>
     </div>
-
-    <button class="btn-main" style="width:250px; background:var(--danger); color:white; margin-top:25px;" onclick="closeFocusMode()">סיים מוקדם וצא</button>
+    
+    <button class="btn-main" style="width:280px; background:var(--danger); color:white; margin-top:30px; font-size:18px;" onclick="closeFocusMode()">סיים למידה וצא מהמצב ❌</button>
 </div>
 
 <div class="main-container">
     <div id="loginArea" class="glass-panel">
-        <h2 style="text-align:center; font-size: 36px; margin-bottom: 5px;">ראלי מטו"ס</h2>
-        <p style="text-align:center; opacity:0.6; margin-bottom:30px;">ממשק תלמיד רשמי</p>
-        <input type="text" id="studentName" placeholder="שם מלא">
-        <input type="text" id="classCode" placeholder="קוד כיתה">
-        <button class="btn-main" onclick="enterClass()">כניסה למערכת</button>
+        <h1 style="text-align:center; font-size: 42px; letter-spacing: -1px; margin-bottom: 5px;">ראלי מטו"ס</h1>
+        <p style="text-align:center; opacity:0.6; margin-bottom:35px; font-size:18px;">ברוך הבא למערכת הלמידה</p>
+        
+        <input type="text" id="studentName" placeholder="הכנס שם מלא">
+        <input type="text" id="classCode" placeholder="קוד כיתה (למשל: A1)">
+        
+        <button class="btn-main" onclick="enterClass()">כניסה לממשק האישי</button>
     </div>
 
     <div id="taskArea" class="hidden">
         <div class="stats-header">
-            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
-                <span id="scoreBadge">💰 0 נקודות</span>
-                <span id="focusTimeBadge">🕒 ריכוז יומי: 0/60 דק'</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div id="scoreBadge" style="font-size:20px; font-weight:900;">💰 0 נקודות</div>
+                <div id="focusTimeBadge" style="font-size:14px; font-weight:bold; opacity:0.9;">🕒 ריכוז יומי: 0/60 דק'</div>
             </div>
             <div class="progress-track"><div id="progressBar"></div></div>
         </div>
 
-        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <div id="welcomeUser" style="font-size: 28px; font-weight: 900;"></div>
-            <div class="schedule-btn-ui" style="background:rgba(255,255,255,0.1); border:1px solid var(--glass-border); padding:10px 18px; border-radius:15px; cursor:pointer;" onclick="showSchedule()">📅 מערכת שעות</div>
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 35px; padding: 0 5px;">
+            <div id="welcomeUser" style="font-size: 30px; font-weight: 900; text-shadow: 0 4px 10px rgba(0,0,0,0.2);"></div>
+            <div style="background:rgba(255,255,255,0.12); padding:12px 20px; border-radius:18px; cursor:pointer; font-weight:bold; border:1px solid var(--glass-border);" onclick="showSchedule()">📅 מערכת</div>
         </div>
 
         <div id="activeTasks"></div>
-        
+
         <div id="archiveWrapper" class="hidden">
-            <div style="font-size: 16px; opacity: 0.8; margin: 40px 0 15px; font-weight: bold; border-right: 4px solid var(--accent); padding-right: 10px;">משימות שהושלמו ✅</div>
-            <div id="archivedTasks" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"></div>
+            <div style="font-size: 17px; opacity: 0.9; margin: 50px 0 20px; font-weight: 800; border-right: 5px solid var(--accent); padding-right: 12px; color: var(--accent);">משימות שהשלמת בהצלחה</div>
+            <div id="archivedTasks" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;"></div>
         </div>
         
-        <div style="text-align:center; margin-top:50px; opacity:0.3; font-size:12px; cursor:pointer; text-decoration: underline;" onclick="logout()">התנתקות מהמערכת</div>
+        <div style="text-align:center; margin-top:60px; opacity:0.3; cursor:pointer; font-size:14px; letter-spacing:1px;" onclick="logout()">LOGOUT - התנתקות מהמערכת</div>
     </div>
 </div>
-
 <div id="scheduleModal" class="modal" onclick="this.style.display='none'"><div class="modal-content" id="scheduleContainer" onclick="event.stopPropagation();"></div></div>
-<div id="wsViewModal" class="modal" onclick="this.style.display='none'"><div class="modal-content" id="wsGrid" style="display:grid; gap:15px;" onclick="event.stopPropagation();"></div></div>
-<div id="imgModal" class="modal" onclick="this.style.display='none'"><div class="modal-content"><img id="modalImg" src="" style="width:100%; border-radius:30px;"></div></div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, query, where, onSnapshot, doc, getDocs, updateDoc, setDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<div id="wsViewModal" class="modal" onclick="this.style.display='none'"><div class="modal-content" id="wsGrid" style="display:grid; gap:20px;" onclick="event.stopPropagation();"></div></div>
+<div id="imgModal" class="modal" onclick="this.style.display='none'"><div class="modal-content"><img id="modalImg" src="" style="width:100%; border-radius:30px; box-shadow: 0 0 50px rgba(0,0,0,0.5);"></div></div>
 
-// הגדרות Firebase המקוריות שלך
+<script type="module">
+// ייבוא ספריות Firebase משרתי גוגל
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, query, where, onSnapshot, doc, getDocs, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// הגדרות פרויקט Firebase
 const firebaseConfig = { 
     apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk", 
     authDomain: "tast-7808e.firebaseapp.com", 
@@ -161,55 +434,66 @@ const firebaseConfig = {
     appId: "1:99024860024:web:24ab70c10254a2014fce8d" 
 };
 
+// אתחול המערכת
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// משתני מערכת גלובליים
 let student = "", classCode = "", currentSchedule = {}, focusTicker, targetMinutes = 0;
 
-// פונקציית כניסה למערכת
+/**
+ * פונקציית כניסה למערכת
+ * בודקת קוד כיתה וטוענת נתונים ראשוניים
+ */
 window.enterClass = async () => {
     student = document.getElementById('studentName').value.trim();
     classCode = document.getElementById('classCode').value.trim().toUpperCase();
     
     if(!student || !classCode) {
-        alert("נא להזין שם וקוד כיתה");
+        alert("נא להזין שם מלא וקוד כיתה כדי להמשיך");
         return;
     }
 
     const snap = await getDocs(query(collection(db, "classes"), where("code", "==", classCode)));
     if(snap.empty) {
-        alert("קוד כיתה לא נמצא במערכת");
+        alert("קוד הכיתה אינו תקין. נא לבדוק שוב.");
         return;
     }
 
-    // שמירת נתונים ב-LocalStorage לכניסה אוטומטית
+    // שמירת מידע וטעינת ממשק
     currentSchedule = snap.docs[0].data().schedule || {};
     localStorage.setItem('studentName', student);
     localStorage.setItem('classCode', classCode);
 
     document.getElementById('loginArea').classList.add('hidden');
     document.getElementById('taskArea').classList.remove('hidden');
-    document.getElementById('welcomeUser').innerText = "היי " + student;
+    document.getElementById('welcomeUser').innerText = "שלום, " + student;
 
-    updateActivityStatus();
     refreshPoints();
     loadTasks();
 };
 
-// עדכון נוכחות בזמן אמת
-function updateActivityStatus() {
-    setDoc(doc(db, "activity", student + "_" + classCode), { 
-        name: student, 
-        classCode: classCode, 
-        lastSeen: serverTimestamp() 
-    }, { merge: true });
-}
+/**
+ * פונקציית חיפוש ביוטיוב
+ * מעדכנת את הנגן בתוך ה-Iframe לפי בקשת התלמיד
+ */
+window.searchYoutube = () => {
+    const q = document.getElementById('ytSearchInput').value;
+    if(!q) {
+        alert("הכנס נושא לחיפוש (למשל: מוזיקה ללימודים)");
+        return;
+    }
+    // שימוש בפורמט הטמעה שמאפשר חיפוש ישיר בתוך הנגן
+    const embedUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}&autoplay=1`;
+    document.getElementById('ytIframe').src = embedUrl;
+};
 
-// טעינת משימות וסנכרון עם Firebase
+/**
+ * טעינת משימות מ-Firestore
+ * מסנכרנת בין רשימת המשימות הכללית לבין מה שהתלמיד כבר הגיש
+ */
 function loadTasks() {
-    // האזנה למשימות מהמורה
     onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tSnap) => {
-        // האזנה לביצועים של התלמיד הספציפי
         onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student)), (sSnap) => {
             const done = {}; 
             sSnap.forEach(d => { if(d.data().completed) done[d.data().taskId] = true; });
@@ -219,34 +503,30 @@ function loadTasks() {
 
             let tasks = []; 
             tSnap.forEach(d => tasks.push({id: d.id, ...d.data()}));
-            
-            // מיון לפי זמן הגשה
             tasks.sort((a,b) => a.endTime - b.endTime);
 
             tasks.forEach(t => {
                 const hasWS = t.worksheets && t.worksheets.length > 0;
-                
                 if(done[t.id]) {
-                    // משימות בארכיון
+                    // כרטיסייה למשימות שהושלמו
                     arc.innerHTML += `
-                        <div class="task-card" style="padding:15px; text-align:center;">
+                        <div class="task-card" style="padding:15px; text-align:center; opacity:0.8; border-right: 4px solid var(--accent);">
                             <div style="font-weight:bold; margin-bottom:5px;">${t.title}</div>
-                            <div style="color:var(--accent); cursor:pointer; font-size:12px;" onclick="toggleTStatus('${t.id}', true)">החזר למשימות</div>
+                            <div style="color:var(--accent); cursor:pointer; font-size:12px; font-weight:bold;" onclick="toggleTStatus('${t.id}', true)">↩️ החזר למשימות</div>
                         </div>`;
                 } else {
-                    // משימות פעילות
+                    // כרטיסיית משימה פעילה
                     act.innerHTML += `
                         <div class="task-card">
                             <div class="ws-controls">
-                                <div class="ws-btn" title="העלאת דף עבודה" onclick="uploadFiles('${t.id}')">📄+</div>
-                                ${hasWS ? `<div class="ws-btn" title="צפייה בדפים" onclick="viewFiles('${t.id}')">👁️</div>` : ''}
-                                ${hasWS && t.worksheetBy === student ? `<div class="ws-btn" style="color:var(--danger)" title="מחיקת דפים שלי" onclick="deleteMyWS('${t.id}')">🗑️</div>` : ''}
+                                <div class="ws-btn" title="העלאת קבצים" onclick="uploadFiles('${t.id}')">➕</div>
+                                ${hasWS ? `<div class="ws-btn" title="צפייה" onclick="viewFiles('${t.id}')">👁️</div>` : ''}
                             </div>
                             <div class="task-title">${t.title}</div>
-                            <div class="task-date">🕒 הגשה עד: ${new Date(t.endTime).toLocaleString('he-IL')}</div>
+                            <div class="task-date">📅 תאריך הגשה: ${new Date(t.endTime).toLocaleString('he-IL', {dateStyle:'short', timeStyle:'short'})}</div>
                             ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="zoomImg('${t.imageUrl}')">` : ''}
-                            <button class="btn-main" onclick="toggleTStatus('${t.id}', false)">סיימתי את המשימה ✅</button>
-                            <div style="text-align:center; margin-top:18px; color:#60a5fa; cursor:pointer; font-weight:bold;" onclick="document.getElementById('focusSetup').style.display='flex'">⏱️ התחל זמן ריכוז ומוזיקה</div>
+                            <button class="btn-main" onclick="toggleTStatus('${t.id}', false)">סימון כבוצע ✅</button>
+                            <div style="text-align:center; margin-top:20px; color:#60a5fa; cursor:pointer; font-size:14px; font-weight:bold;" onclick="document.getElementById('focusSetup').style.display='flex'">🎧 למידה עם מוזיקה וטיימר</div>
                         </div>`;
                 }
             });
@@ -255,16 +535,16 @@ function loadTasks() {
     });
 }
 
-// לוגיקת ריכוז ויוטיוב מוטמע
+/**
+ * ניהול מצב ריכוז (טיימר)
+ */
 window.startFocusSession = () => {
     targetMinutes = parseInt(document.getElementById('focusTimeVal').value) || 25;
     const color = document.getElementById('timerColorChoice').value;
     
     document.getElementById('focusSetup').style.display = 'none';
     document.getElementById('timerOverlay').style.display = 'flex';
-    
-    const display = document.getElementById('countdownTimer');
-    display.style.color = color;
+    document.getElementById('countdownTimer').style.color = color;
     
     let timeRemaining = targetMinutes * 60;
     
@@ -272,164 +552,142 @@ window.startFocusSession = () => {
         timeRemaining--;
         let m = Math.floor(timeRemaining / 60);
         let s = timeRemaining % 60;
-        display.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        document.getElementById('countdownTimer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
 
         if(timeRemaining <= 0) {
             clearInterval(focusTicker);
-            completeFocus();
+            // עדכון ניקוד יומי
+            const today = new Date().toLocaleDateString();
+            localStorage.setItem('f_'+today, (parseInt(localStorage.getItem('f_'+today))||0) + targetMinutes);
+            localStorage.setItem('pts', (parseInt(localStorage.getItem('pts'))||0) + (targetMinutes*10));
+            alert("מדהים! סיימת את זמן הריכוז וצברת נקודות 💰");
+            refreshPoints(); 
+            closeFocusMode();
         }
     }, 1000);
 };
 
-function completeFocus() {
-    const today = new Date().toLocaleDateString();
-    const currentFocus = parseInt(localStorage.getItem('f_' + today)) || 0;
-    const currentPoints = parseInt(localStorage.getItem('pts')) || 0;
-
-    localStorage.setItem('f_' + today, currentFocus + targetMinutes);
-    localStorage.setItem('pts', currentPoints + (targetMinutes * 10));
-
-    alert("מצוין! סיימת " + targetMinutes + " דקות ריכוז וצברת נקודות!");
-    refreshPoints();
-    closeFocusMode();
-}
-
 window.closeFocusMode = () => { 
-    clearInterval(focusTicker); 
-    document.getElementById('timerOverlay').style.display = 'none'; 
+    if(confirm("בטוח שברצונך להפסיק את מצב הריכוז?")) {
+        clearInterval(focusTicker); 
+        document.getElementById('timerOverlay').style.display = 'none'; 
+    }
 };
 
-// הפונקציה החדשה שמוסיפים כאן:
-window.searchYoutube = () => {
-    const query = document.getElementById('ytSearchInput').value;
-    if (!query) return;
-    const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}`;
-    document.getElementById('ytIframe').src = searchUrl;
-};
-
+/**
+ * עדכון תצוגת נקודות והתקדמות
+ */
 function refreshPoints() {
     const today = new Date().toLocaleDateString();
-    const f = parseInt(localStorage.getItem('f_' + today)) || 0;
-    const p = localStorage.getItem('pts') || 0;
+    const focusDone = parseInt(localStorage.getItem('f_'+today)) || 0;
+    const totalPoints = localStorage.getItem('pts') || 0;
     
-    document.getElementById('scoreBadge').innerText = `💰 ${p} נקודות`;
-    document.getElementById('focusTimeBadge').innerText = `🕒 ריכוז: ${f}/60 דק'`;
+    document.getElementById('scoreBadge').innerText = `💰 ${totalPoints} נקודות`;
+    document.getElementById('focusTimeBadge').innerText = `🕒 ריכוז יומי: ${focusDone}/60 דק'`;
     
-    const progress = Math.min((f / 60) * 100, 100);
-    document.getElementById('progressBar').style.width = progress + "%";
-}
+    const progressPercent = Math.min((focusDone / 60) * 100, 100);
+    document.getElementById('progressBar').style.width = progressPercent + "%";
 }
 
-// ניהול מערכת שעות (עם הצבעים המקוריים)
+/**
+ * הצגת מערכת שעות מפורטת
+ */
 window.showSchedule = () => {
     const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי"];
     const colors = ["sun", "mon", "tue", "wed", "thu"];
     
-    let html = `<h2 style="text-align:center; margin-bottom:20px;">📅 מערכת שעות שבועית</h2>`;
+    let html = `<h2 style="text-align:center; margin-bottom:25px; font-size:28px;">📅 לוח זמנים כיתתי</h2>`;
     
-    html += days.map((day, i) => {
+    html += days.map((dayName, i) => {
         const lessons = currentSchedule[`day${i}`] || [];
         return `
             <div class="day-box ${colors[i]}">
-                <strong>יום ${day}</strong>
-                ${lessons.length ? lessons.map(l => `
-                    <div style="display:flex; justify-content:space-between; font-size:14px; margin-top:6px; border-top:1px solid rgba(255,255,255,0.05); pt:4px;">
-                        <span>${l.subject}</span>
-                        <span style="opacity:0.7;">${l.time}</span>
-                    </div>`).join('') : '<div style="font-size:12px; opacity:0.5;">אין שיעורים רשומים</div>'}
+                <strong style="font-size:18px;">יום ${dayName}</strong>
+                <div style="margin-top:10px;">
+                    ${lessons.length > 0 ? lessons.map(l => `
+                        <div class="lesson-row">
+                            <span>📖 ${l.subject}</span>
+                            <span style="opacity:0.8;">⏰ ${l.time}</span>
+                        </div>
+                    `).join('') : '<div style="opacity:0.5; font-size:12px;">אין שיעורים רשומים</div>'}
+                </div>
             </div>`;
     }).join('');
-    
-    html += `<button class="btn-main" style="margin-top:15px; font-size:16px;" onclick="document.getElementById('scheduleModal').style.display='none'">סגור מערכת</button>`;
+
+    html += `<button class="btn-main" style="margin-top:20px; background:var(--danger); color:white;" onclick="document.getElementById('scheduleModal').style.display='none'">סגור חלון</button>`;
     
     document.getElementById('scheduleContainer').innerHTML = html;
     document.getElementById('scheduleModal').style.display = 'block';
 };
 
-// ניהול דפי עבודה (העלאה, צפייה, מחיקה)
+/**
+ * פונקציות להעלאה וניהול דפים
+ */
 window.uploadFiles = (id) => {
     const inp = document.createElement('input'); 
     inp.type = 'file'; 
     inp.multiple = true;
     inp.accept = "image/*";
-
+    
     inp.onchange = async (e) => {
         const files = Array.from(e.target.files);
-        if(files.length === 0) return;
-
-        const b64Array = await Promise.all(files.map(f => new Promise(res => {
+        const b64 = await Promise.all(files.map(f => new Promise(res => {
             const r = new FileReader(); 
             r.onload = ev => res(ev.target.result); 
             r.readAsDataURL(f);
         })));
-
-        await updateDoc(doc(db, "tasks", id), { 
-            worksheets: b64Array, 
-            worksheetBy: student 
-        });
-        alert("דפי העבודה הועלו בהצלחה!");
+        await updateDoc(doc(db, "tasks", id), { worksheets: b64, worksheetBy: student });
+        alert("הקבצים נשלחו למורה בהצלחה! ⭐");
     };
     inp.click();
 };
 
 window.viewFiles = async (id) => {
-    const taskSnap = await getDocs(collection(db, "tasks"));
-    const taskData = taskSnap.docs.find(x => x.id === id).data();
+    const snap = await getDocs(collection(db, "tasks"));
+    const task = snap.docs.find(x => x.id === id).data();
     
-    if(taskData && taskData.worksheets) {
-        document.getElementById('wsGrid').innerHTML = `
-            <h3 style="text-align:center;">דפים שהועלו</h3>
-            ${taskData.worksheets.map(img => `<img src="${img}" style="width:100%; border-radius:15px; border:1px solid var(--glass-border);">`).join('')}
-            <button class="btn-main" onclick="document.getElementById('wsViewModal').style.display='none'">סגור</button>
-        `;
-        document.getElementById('wsViewModal').style.display = 'block';
-    }
+    document.getElementById('wsGrid').innerHTML = `
+        <h3 style="text-align:center;">דפי העבודה שלך</h3>
+        ${task.worksheets.map(img => `<img src="${img}" style="width:100%; border-radius:15px; border:1px solid var(--glass-border);">`).join('')}
+        <button class="btn-main" onclick="document.getElementById('wsViewModal').style.display='none'">סגור צפייה</button>
+    `;
+    document.getElementById('wsViewModal').style.display = 'block';
 };
 
-window.deleteMyWS = async (id) => {
-    if(confirm("בטוח שברצונך למחוק את דפי העבודה שהעלית?")) {
-        await updateDoc(doc(db, "tasks", id), { 
-            worksheets: null, 
-            worksheetBy: null 
-        });
-        alert("הדפים נמחקו");
-    }
-};
-
-// עדכון סטטוס משימה (סיום/החזרה)
-window.toggleTStatus = async (tid, isAlreadyDone) => {
+// עדכון מצב משימה (סיום/החזרה)
+window.toggleTStatus = async (tid, isDone) => {
     await setDoc(doc(db, "submissions", student + "_" + tid), { 
         studentName: student, 
         taskId: tid, 
-        completed: !isAlreadyDone, 
-        classCode: classCode,
-        timestamp: serverTimestamp()
+        completed: !isDone, 
+        classCode: classCode, 
+        lastUpdate: serverTimestamp() 
     });
 };
 
-// פונקציות עזר (זום, התנתקות, טעינה)
+// כלי עזר לתצוגה
 window.zoomImg = (url) => { 
     document.getElementById('modalImg').src = url; 
     document.getElementById('imgModal').style.display = 'block'; 
 };
 
 window.logout = () => { 
-    if(confirm("להתנתק מהמערכת?")) {
+    if(confirm("האם ברצונך להתנתק מהמערכת? הנתונים האישיים יישמרו.")) {
         localStorage.clear(); 
         location.reload(); 
     }
 };
 
-window.onload = () => {
+// אתחול אוטומטי בטעינת הדף
+window.onload = () => { 
     const savedName = localStorage.getItem('studentName');
-    const savedCode = localStorage.getItem('classCode');
-    if(savedName && savedCode) {
+    const savedClass = localStorage.getItem('classCode');
+    if(savedName && savedClass) {
         document.getElementById('studentName').value = savedName;
-        document.getElementById('classCode').value = savedCode;
+        document.getElementById('classCode').value = savedClass;
         enterClass();
     }
 };
 </script>
 </body>
 </html>
-
