@@ -49,17 +49,18 @@ input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.2);
 .status-btn { padding: 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.08); text-align: center; font-weight: 800; cursor: pointer; border: 1px solid var(--glass-border); transition: 0.3s; }
 .status-btn:hover { background: var(--accent); }
 
-/* --- רכיבים חדשים --- */
+/* --- שדרוג פוקוס --- */
+#statsBar { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 15px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--glass-border); }
+#timerOverlay { position: fixed; inset: 0; background: rgba(10, 15, 30, 0.98); z-index: 8000; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+#timerClock { font-size: 90px; font-weight: 900; color: #60a5fa; text-shadow: 0 0 20px rgba(96, 165, 250, 0.5); }
+.focus-setup { display: flex; gap: 10px; align-items: center; margin-top: 15px; }
+.focus-setup input { width: 70px; margin: 0; padding: 10px; text-align: center; }
+.focus-setup button { padding: 10px 15px; background: #60a5fa; color: white; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
 #pushNotif { position: fixed; top: 20px; left: 20px; right: 20px; background: #10b981; color: white; padding: 20px; border-radius: 20px; z-index: 9999; display: none; animation: slideIn 0.5s ease; box-shadow: 0 10px 40px rgba(0,0,0,0.6); text-align: center; font-weight: bold; }
 @keyframes slideIn { from { transform: translateY(-150%); } to { transform: translateY(0); } }
 
-#timerOverlay { position: fixed; inset: 0; background: rgba(10, 15, 30, 0.98); z-index: 8000; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-#timerClock { font-size: 90px; font-weight: 900; color: #60a5fa; text-shadow: 0 0 20px rgba(96, 165, 250, 0.5); }
-.focus-btn { background: #60a5fa; color: white; padding: 10px 18px; border-radius: 15px; font-weight: bold; font-size: 14px; margin-top: 15px; cursor: pointer; border: none; display: inline-block; }
-
 .modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); padding: 30px 15px; overflow-y: auto; }
 .modal-content { width: 100%; max-width: 450px; margin: 0 auto; animation: scaleIn 0.4s ease-out; }
-
 .day-box { background: rgba(255, 255, 255, 0.07); border-radius: 22px; padding: 18px; margin-bottom: 12px; border-right: 6px solid white; }
 .day-box.sun { border-color: var(--sun-color); }
 .day-box.mon { border-color: var(--mon-color); }
@@ -71,11 +72,11 @@ input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.2);
 </head>
 <body>
 
-<div id="pushNotif">🔔 משימה חדשה נוספה לכיתה!</div>
+<div id="pushNotif">🔔 משימה חדשה התווספה!</div>
 
 <div id="timerOverlay">
-    <div id="timerClock">25:00</div>
-    <p style="margin-top:20px; opacity:0.7;">מוזיקת ריכוז מופעלת... עבודה נעימה!</p>
+    <div id="timerClock">00:00</div>
+    <p id="focusMsg" style="margin-top:20px; opacity:0.7;">עובדים בריכוז...</p>
     <iframe id="lofiPlayer" width="0" height="0" src="" frameborder="0" allow="autoplay"></iframe>
     <button class="btn-main" style="max-width:200px; margin-top:40px; background:#ef4444; color:white;" onclick="stopFocus()">הפסק פוקוס</button>
 </div>
@@ -89,6 +90,11 @@ input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.2);
 </div>
 
 <div id="taskArea" class="hidden">
+<div id="statsBar">
+    <span id="dailyMinutes">🕒 ריכוז היום: 0 דקות</span>
+    <span style="opacity:0.6; font-size:12px;">ראלי מטו"ס</span>
+</div>
+
 <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
 <div id="helloName" style="font-size: 28px; font-weight: 900;"></div>
 <div style="text-align:left;">
@@ -140,7 +146,7 @@ appId: "1:99024860024:web:24ab70c10254a2014fce8d"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let student = "", classCode = "", currentSchedule = {};
-let focusTimer;
+let focusTimer, currentTargetMinutes = 0;
 let isFirstLoad = true;
 
 window.enterClass = async () => {
@@ -159,6 +165,7 @@ document.getElementById('loginArea').classList.add('hidden');
 document.getElementById('taskArea').classList.remove('hidden');
 document.getElementById('helloName').innerText = " היי " + student;
 
+updateStatsDisplay();
 updateActivity();
 loadTasks();
 };
@@ -169,8 +176,6 @@ setDoc(doc(db, "activity", student + "_" + classCode), { name: student, classCod
 
 function loadTasks() {
 onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tSnap) => {
-    
-    // --- מנגנון התראות PUSH אמיתי ---
     if(!isFirstLoad) {
         tSnap.docChanges().forEach(change => {
             if(change.type === "added") {
@@ -210,7 +215,10 @@ onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), 
     <div class="task-date">🕒 להגשה עד : ${new Date(t.endTime).toLocaleString('he-IL')}</div>
     ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="zoom('${t.imageUrl}')">` : ''}
     <div class="status-btn" onclick="toggleTask('${t.id}', false )">⬜ סמן שסיימתי </div>
-    <button class="focus-btn" onclick="startFocus()">⏱️ פוקוס (25 דק')</button>
+    <div class="focus-setup">
+        <input type="number" id="min-${t.id}" value="25" min="1" max="120">
+        <button onclick="startFocus('${t.id}')">⏱️ התחל פוקוס</button>
+    </div>
     </div>`;
     }
     });
@@ -219,18 +227,36 @@ onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), 
 });
 }
 
-// --- פונקציות מוזיקה וטיימר ---
-window.startFocus = () => {
+// --- לוגיקת פוקוס משופרת ---
+window.startFocus = (id) => {
+    const minsInput = document.getElementById('min-' + id);
+    currentTargetMinutes = parseInt(minsInput.value) || 25;
+    
     document.getElementById('timerOverlay').style.display = 'flex';
     document.getElementById('lofiPlayer').src = "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1";
-    let time = 25 * 60;
+    
+    let time = currentTargetMinutes * 60;
     focusTimer = setInterval(() => {
         time--;
         let m = Math.floor(time / 60), s = time % 60;
         document.getElementById('timerClock').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-        if(time <= 0) stopFocus();
+        if(time <= 0) {
+            completeFocus();
+        }
     }, 1000);
 };
+
+function completeFocus() {
+    clearInterval(focusTimer);
+    const today = new Date().toLocaleDateString();
+    let total = parseInt(localStorage.getItem('focus_' + today)) || 0;
+    total += currentTargetMinutes;
+    localStorage.setItem('focus_' + today, total);
+    
+    alert("כל הכבוד! צברת " + currentTargetMinutes + " דקות של ריכוז.");
+    updateStatsDisplay();
+    stopFocus();
+}
 
 window.stopFocus = () => {
     clearInterval(focusTimer);
@@ -238,6 +264,13 @@ window.stopFocus = () => {
     document.getElementById('lofiPlayer').src = "";
 };
 
+function updateStatsDisplay() {
+    const today = new Date().toLocaleDateString();
+    const total = localStorage.getItem('focus_' + today) || 0;
+    document.getElementById('dailyMinutes').innerText = `🕒 ריכוז היום: ${total} דקות`;
+}
+
+// שאר הפונקציות המקוריות נשארות כפי שהן [cite: 190-237]
 window.showSchedule = () => {
 const container = document.getElementById('scheduleContainer');
 const days = [" ראשון ", " שני ", " שלישי ", " רביעי ", " חמישי "];
