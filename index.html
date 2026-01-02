@@ -1,1142 +1,277 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ראלי מטו"ס - מערכת למידה אישית 2026</title>
-    
-    <style>
-        /* =========================================
-           הגדרות בסיסיות (Root & Reset)
-           ========================================= */
-        :root {
-            /* פלטת צבעים יוקרתית */
-            --bg-deep: #0f172a;
-            --accent-main: #6366f1; /* סגול אינדיגו */
-            --success: #10b981;    /* ירוק ברקת */
-            --warning: #f59e0b;    /* כתום אזהרה */
-            --danger: #ef4444;     /* אדום */
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-strong: rgba(255, 255, 255, 0.2);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            
-            /* צבעי ימים למערכת השעות */
-            --day-sun: #fbbf24;
-            --day-mon: #f87171;
-            --day-tue: #34d399;
-            --day-wed: #60a5fa;
-            --day-thu: #c084fc;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 0;
-            direction: rtl;
-            background: var(--bg-deep);
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            overflow-x: hidden;
-            /* רקע גרדיאנט דינמי */
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-        }
-
-        /* =========================================
-           אנימציות (Animations)
-           ========================================= */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
-        }
-
-        /* =========================================
-           מכולות ראשיות (Layout)
-           ========================================= */
-        .app-container {
-            width: 100%;
-            max-width: 500px;
-            padding: 20px;
-            z-index: 10;
-        }
-
-        .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 25px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        /* =========================================
-           מערכת הניקוד והסטטיסטיקה (Dashboard)
-           ========================================= */
-        .stats-card {
-            margin-bottom: 20px;
-        }
-
-        .points-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .points-box {
-            font-size: 26px;
-            font-weight: 900;
-            background: linear-gradient(to left, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .progress-container {
-            width: 100%;
-            height: 12px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--glass-border);
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--success), #34d399);
-            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* =========================================
-           כפתורים (Buttons)
-           ========================================= */
-        .btn-primary {
-            width: 100%;
-            padding: 20px;
-            border-radius: 20px;
-            border: none;
-            background: white;
-            color: var(--bg-deep);
-            font-weight: 800;
-            font-size: 18px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-focus {
-            background: linear-gradient(135deg, var(--accent-main), #4f46e5);
-            color: white;
-            padding: 22px;
-            border-radius: 25px;
-            font-size: 20px;
-            font-weight: 900;
-            margin: 25px 0;
-            animation: pulseGlow 2s infinite;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .btn-focus:active { transform: scale(0.97); }
-
-        /* =========================================
-           כרטיסיות משימות (Task Cards)
-           ========================================= */
-        .task-card {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 18px;
-            position: relative;
-            transition: transform 0.3s ease;
-        }
-
-        .task-card:hover { transform: translateY(-3px); background: rgba(255,255,255,0.09); }
-
-        .task-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
-        .task-deadline { font-size: 13px; color: var(--warning); font-weight: 600; margin-bottom: 15px; }
-
-        .task-img { width: 100%; border-radius: 18px; margin-bottom: 15px; cursor: zoom-in; }
-
-        /* =========================================
-           מצב ריכוז (Focus Overlay)
-           ========================================= */
-        #focusOverlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(10, 15, 30, 0.98);
-            backdrop-filter: blur(25px);
-            z-index: 9999;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .timer-display {
-            font-size: 90px;
-            font-weight: 900;
-            margin: 15px 0;
-            font-variant-numeric: tabular-nums;
-            text-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
-        }
-
-        .yt-frame-container {
-            width: 100%;
-            max-width: 800px;
-            height: 350px;
-            border-radius: 25px;
-            overflow: hidden;
-            border: 2px solid var(--glass-border);
-            background: #000;
-            margin-bottom: 25px;
-        }
-
-        /* המשימות בתוך מצב למידה - מיון וסדר */
-        .focus-tasks-list {
-            width: 100%;
-            max-width: 480px;
-            margin-bottom: 100px;
-        }
-
-        .focus-mini-card {
-            background: rgba(255, 255, 255, 0.08);
-            border-right: 6px solid var(--accent-main);
-            border-radius: 18px;
-            padding: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        .mini-card-info b { font-size: 17px; display: block; }
-        .mini-card-info span { font-size: 12px; color: var(--warning); font-weight: bold; }
-
-        /* כפתור יציאה */
-        .exit-focus-btn {
-            position: fixed;
-            bottom: 30px;
-            background: var(--danger);
-            color: white;
-            padding: 18px 40px;
-            border-radius: 20px;
-            font-weight: 800;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
-        }
-
-        .hidden { display: none !important; }
-    </style>
-    <body>
-
-<div id="focusConfigModal" class="hidden" style="position:fixed; inset:0; background:rgba(10,15,30,0.96); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(15px);">
-    <div class="glass-panel" style="width:90%; max-width:400px; text-align:center; border: 1px solid var(--accent-main);">
-        <h2 style="font-size:30px; margin-bottom:10px;">🚀 התחלת ריכוז</h2>
-        <p style="opacity:0.7; margin-bottom:25px;">הגדר את היעדים שלך לסשן הנוכחי</p>
-        
-        <div style="text-align:right; margin-bottom:20px;">
-            <label style="font-size:14px; margin-bottom:8px; display:block; padding-right:5px;">כמה דקות תרצה ללמוד?</label>
-            <input type="number" id="focusMinsInput" value="25" style="width:100%; padding:18px; border-radius:15px; border:none; background:rgba(255,255,255,0.08); color:white; font-size:18px; outline:none; text-align:center;">
-        </div>
-
-        <div style="text-align:right; margin-bottom:30px;">
-            <label style="font-size:14px; margin-bottom:8px; display:block; padding-right:5px;">בחר סגנון שעון:</label>
-            <select id="focusColorTheme" style="width:100%; padding:18px; border-radius:15px; border:none; background:rgba(255,255,255,0.08); color:white; font-size:18px; outline:none;">
-                <option value="#6366f1">סגול אינדיגו (ריכוז עמוק)</option>
-                <option value="#10b981">ירוק ברקת (יצירתיות)</option>
-                <option value="#fbbf24">צהוב זהב (אנרגיה)</option>
-                <option value="#f8fafc">לבן שלג (שקט)</option>
-            </select>
-        </div>
-
-        <button class="btn-primary" style="background:var(--accent-main); color:white; font-size:20px;" onclick="initiateFocusMode()">צא לדרך!</button>
-        <button onclick="closeFocusSetup()" style="background:none; border:none; color:white; margin-top:20px; opacity:0.5; cursor:pointer; font-size:14px;">חזור למשימות</button>
-    </div>
-</div>
-
-<div class="app-container">
-    
-    <div id="loginView" class="glass-panel">
-        <h1 style="font-size:48px; text-align:center; margin-bottom:5px; letter-spacing:-2px; font-weight:900;">ראלי מטו"ס</h1>
-        <p style="text-align:center; opacity:0.5; margin-bottom:40px; font-size:18px;">Student Management System</p>
-        
-        <div style="margin-bottom:15px;">
-            <input type="text" id="inputName" placeholder="שם מלא של התלמיד" style="width:100%; padding:22px; border-radius:20px; border:none; background:rgba(255,255,255,0.06); color:white; font-size:18px; box-sizing:border-box; outline:none;">
-        </div>
-        <div style="margin-bottom:30px;">
-            <input type="text" id="inputClass" placeholder="קוד כיתה (A1, B2...)" style="width:100%; padding:22px; border-radius:20px; border:none; background:rgba(255,255,255,0.06); color:white; font-size:18px; box-sizing:border-box; outline:none;">
-        </div>
-        
-        <button class="btn-primary" onclick="processLogin()">התחבר למרכז הלמידה</button>
-    </div>
-
-    <div id="mainView" class="hidden">
-        
-        <div class="glass-panel stats-card">
-            <div class="points-row">
-                <div id="userGreeting" style="font-size:24px; font-weight:800;">היי, טוען...</div>
-                <div class="points-box" id="pointsVal">💰 0</div>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; font-size:12px; opacity:0.7; margin-bottom:8px;">
-                <span>יעד ריכוז יומי (דקות)</span>
-                <span id="focusProgressText">0 / 60</span>
-            </div>
-            <div class="progress-container">
-                <div class="progress-bar" id="dailyBar"></div>
-            </div>
-        </div>
-
-        <button class="btn-focus" onclick="openFocusSetup()">
-            <span>⚡</span> כניסה למצב למידה ומוזיקה
-        </button>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:0 10px;">
-            <h2 style="margin:0; font-size:22px;">המשימות שלי</h2>
-            <div style="cursor:pointer; font-size:13px; background:var(--glass-strong); padding:8px 15px; border-radius:12px; font-weight:bold;" onclick="toggleSchedule()">📅 מערכת שעות</div>
-        </div>
-        
-        <div id="activeTasksList">
-            </div>
-
-        <div id="completedTasksArea" class="hidden">
-            <h3 style="margin:45px 0 15px 0; opacity:0.5; font-size:15px; padding-right:10px;">משימות שהסתיימו ✅</h3>
-            <div id="doneTasksList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"></div>
-        </div>
-
-        <div style="text-align:center; margin:60px 0 20px 0; opacity:0.3; font-size:12px; cursor:pointer; text-decoration:underline;" onclick="doLogout()">התנתקות מהמערכת</div>
-    </div>
-</div>
-
-<div id="focusOverlay">
-    <div class="timer-display" id="timerDigits">00:00</div>
-    
-    <div class="yt-frame-container">
-        <div style="display:flex; background:#111; padding:12px; border-bottom:1px solid #333;">
-            <input type="text" id="ytQuery" placeholder="חפש מוזיקה ללימודים..." style="flex:1; background:#222; border:none; color:white; padding:10px 15px; border-radius:10px; font-size:14px; outline:none;">
-            <button onclick="handleYTSearch()" style="background:var(--accent-main); border:none; color:white; padding:0 20px; border-radius:10px; margin-right:8px; font-weight:bold; cursor:pointer;">חיפוש</button>
-        </div>
-        <iframe id="focusIframe" width="100%" height="100%" src="https://www.youtube.com/embed?enablejsapi=1&origin=https://www.youtube.com" frameborder="0"></iframe>
-    </div>
-
-    <div class="focus-tasks-list">
-        <h3 style="text-align:center; color:var(--success); margin-bottom:20px; font-size:18px;">המשימות שלך לביצוע (לפי דחיפות):</h3>
-        <div id="focusMiniTaskList">
-            </div>
-    </div>
-
-    <button class="exit-focus-btn" onclick="terminateFocusMode()">סיים סשן למידה וצא ❌</button>
-</div>
-
-<div id="imageZoomModal" class="hidden" style="position:fixed; inset:0; z-index:11000; background:rgba(0,0,0,0.95); display:flex; align-items:center; justify-content:center;" onclick="this.classList.add('hidden')">
-    <img id="zoomedImg" src="" style="max-width:95%; max-height:95%; border-radius:10px; box-shadow:0 0 40px rgba(0,0,0,0.5);">
-</div>
-
-<div id="scheduleModal" class="hidden" style="position:fixed; inset:0; z-index:10500; background:rgba(10,15,30,0.98); padding:30px; overflow-y:auto;" onclick="this.classList.add('hidden')">
-    <div id="scheduleContent" onclick="event.stopPropagation()"></div>
-    <button class="btn-primary" style="background:var(--danger); color:white; margin-top:30px; max-width:200px; display:block; margin-left:auto; margin-right:auto;">סגור מערכת</button>
-</div>
-</head>
-<script>
-    // משתנים גלובליים
-    let currentUser = null;
-    let tasks = [];
-    let focusTimer = null;
-    let secondsLeft = 0;
-    let points = 0;
-    let dailyFocusMinutes = 0;
-
-    // --- 1. פונקציית מיון המשימות הקריטית ---
-    function sortTasksByDeadline(taskArray) {
-        return taskArray.sort((a, b) => {
-            // הפיכת תאריכים לאובייקט Date להשוואה
-            // פורמט מצופה: YYYY-MM-DD
-            const dateA = new Date(a.deadline);
-            const dateB = new Date(b.deadline);
-            return dateA - dateB; 
-        });
-    }
-
-    // --- 2. חישוב זמן נותר להגשה ---
-    function getRemainingTimeText(deadlineStr) {
-        const now = new Date();
-        const deadline = new Date(deadlineStr);
-        const diffInMs = deadline - now;
-        
-        if (diffInMs < 0) return "עבר זמן ההגשה ⚠️";
-        
-        const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-        const diffInHours = Math.floor((diffInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        
-        if (diffInDays > 0) {
-            return `נשארו עוד ${diffInDays} ימים להגשה`;
-        } else if (diffInHours > 0) {
-            return `נותרו ${diffInHours} שעות - דחוף! 🔥`;
-        } else {
-            return "להגשה היום! ⏳";
-        }
-    }
-
-    // --- 3. רינדור רשימת המשימות במצב רגיל ---
-    function renderTasks() {
-        const container = document.getElementById('activeTasksList');
-        const doneContainer = document.getElementById('doneTasksList');
-        const activeTasks = sortTasksByDeadline(tasks.filter(t => !t.completed));
-        const completedTasks = tasks.filter(t => t.completed);
-
-        container.innerHTML = '';
-        activeTasks.forEach(task => {
-            const card = document.createElement('div');
-            card.className = 'task-card';
-            card.innerHTML = `
-                <div class="task-title">${task.title}</div>
-                <div class="task-deadline">📅 הגשה עד: ${task.deadline}</div>
-                ${task.img ? `<img src="${task.img}" class="task-img" onclick="zoomImage('${task.img}')">` : ''}
-                <button class="btn-primary" onclick="completeTask('${task.id}')" style="padding:12px; font-size:14px; background:rgba(16,185,129,0.2); color:#10b981; border:1px solid #10b981;">סיימתי את זה ✅</button>
-            `;
-            container.appendChild(card);
-        });
-
-        // עדכון ארכיון
-        if(completedTasks.length > 0) {
-            document.getElementById('completedTasksArea').classList.remove('hidden');
-            doneContainer.innerHTML = '';
-            completedTasks.forEach(task => {
-                const mini = document.createElement('div');
-                mini.style = "background:rgba(255,255,255,0.03); padding:10px; border-radius:15px; font-size:12px; text-align:center; opacity:0.6;";
-                mini.innerHTML = `<b>${task.title}</b><br>בוצע ✨`;
-                doneContainer.appendChild(mini);
-            });
-        }
-    }
-
-    // --- 4. רינדור רשימת משימות דחופות למצב למידה ---
-    function renderFocusTasks() {
-        const container = document.getElementById('focusMiniTaskList');
-        const activeTasks = sortTasksByDeadline(tasks.filter(t => !t.completed));
-        
-        container.innerHTML = '';
-        activeTasks.forEach(task => {
-            const timeInfo = getRemainingTimeText(task.deadline);
-            const card = document.createElement('div');
-            card.className = 'focus-mini-card';
-            card.innerHTML = `
-                <div class="mini-card-info">
-                    <b>${task.title}</b>
-                    <span>${timeInfo}</span>
-                </div>
-                <button onclick="completeTask('${task.id}'); this.parentElement.style.opacity='0.3'; this.remove();" style="background:none; border:1px solid var(--success); color:var(--success); border-radius:50%; width:30px; height:30px; cursor:pointer;">✓</button>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    // --- 5. לוגיקת הטיימר ומצב למידה ---
-    function initiateFocusMode() {
-        const mins = document.getElementById('focusMinsInput').value;
-        secondsLeft = mins * 60;
-        const themeColor = document.getElementById('focusColorTheme').value;
-        
-        // הגדרת עיצוב המצב
-        document.documentElement.style.setProperty('--accent-main', themeColor);
-        document.getElementById('timerDigits').style.color = themeColor;
-        
-        document.getElementById('focusConfigModal').classList.add('hidden');
-        document.getElementById('focusOverlay').style.display = 'flex';
-        
-        renderFocusTasks(); // הצגת המשימות הממוינות
-        startTimer();
-    }
-
-    function startTimer() {
-        if(focusTimer) clearInterval(focusTimer);
-        
-        focusTimer = setInterval(() => {
-            if(secondsLeft <= 0) {
-                clearInterval(focusTimer);
-                alert("כל הכבוד! סיימת את סשן הלמידה 🏆");
-                terminateFocusMode();
-                return;
-            }
-            secondsLeft--;
-            updateTimerDisplay();
-        }, 1000);
-    }
-
-    function updateTimerDisplay() {
-        const m = Math.floor(secondsLeft / 60);
-        const s = secondsLeft % 60;
-        document.getElementById('timerDigits').innerText = 
-            `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-    }
-
-    function terminateFocusMode() {
-        clearInterval(focusTimer);
-        document.getElementById('focusOverlay').style.display = 'none';
-        // הוספת נקודות ועדכון גרף יומי (חישוב זמני)
-        addPoints(50);
-        renderTasks();
-    }
-
-    // --- פונקציות עזר ---
-    function zoomImage(src) {
-        document.getElementById('zoomedImg').src = src;
-        document.getElementById('imageZoomModal').classList.remove('hidden');
-    }
-
-    function addPoints(amount) {
-        points += amount;
-        document.getElementById('pointsVal').innerText = `💰 ${points}`;
-    }
-</script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
-<script>
-    // --- 1. הגדרות חיבור ל-Firebase ---
-    // הערה: יש להחליף את הנתונים כאן ב-Firebase Config האמיתי של הפרויקט שלך
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "rally-matos.firebaseapp.com",
-        databaseURL: "https://rally-matos-default-rtdb.firebaseio.com",
-        projectId: "rally-matos",
-        storageBucket: "rally-matos.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:abcdef"
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // --- 2. לוגיקת התחברות (Login) ---
-    function processLogin() {
-        const name = document.getElementById('inputName').value.trim();
-        const classCode = document.getElementById('inputClass').value.trim().toUpperCase();
-
-        if (name === "" || classCode === "") {
-            alert("נא להזין שם וקוד כיתה תקני");
-            return;
-        }
-
-        currentUser = { name, classCode };
-        document.getElementById('userGreeting').innerText = `היי, ${name}`;
-        document.getElementById('loginView').classList.add('hidden');
-        document.getElementById('mainView').classList.remove('hidden');
-
-        // טעינת נתונים
-        loadTasks();
-        loadUserStats();
-    }
-
-    // --- 3. טעינת משימות בזמן אמת ---
-    function loadTasks() {
-        const tasksRef = db.ref(`classes/${currentUser.classCode}/tasks`);
-        tasksRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            tasks = [];
-            if (data) {
-                for (let id in data) {
-                    tasks.push({ id, ...data[id] });
-                }
-            }
-            renderTasks();
-            // אם אנחנו באמצע מצב למידה, נעדכן גם שם את הרשימה הדחופה
-            if (document.getElementById('focusOverlay').style.display === 'flex') {
-                renderFocusTasks();
-            }
-        });
-    }
-
-    // --- 4. השלמת משימה ועדכון ניקוד ---
-    function completeTask(taskId) {
-        // עדכון ב-Database
-        db.ref(`classes/${currentUser.classCode}/tasks/${taskId}`).update({
-            completed: true,
-            completedBy: currentUser.name
-        });
-
-        // אנימציה קטנה של הצלחה
-        addPoints(100);
-        confettiEffect(); // אם יש לך ספריית קונפטי, כאן זה הזמן
-    }
-
-    // --- 5. ניהול נגן היוטיוב (YouTube Smart Player) ---
-    function handleYTSearch() {
-        const query = document.getElementById('ytQuery').value;
-        if (!query) return;
-
-        // המרת חיפוש טקסט לקישור יוטיוב (חיפוש בתוך ה-Embed)
-        const embedUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query + " lofi study music")}&autoplay=1&enablejsapi=1`;
-        document.getElementById('focusIframe').src = embedUrl;
-    }
-
-    // --- 6. מערכת שעות (Schedule) ---
-    const weeklySchedule = {
-        "A1": [
-            { day: "ראשון", lessons: ["מתמטיקה", "אנגלית", "היסטוריה", "ספורט"] },
-            { day: "שני", lessons: ["פיזיקה", "ספרות", "לשון", "תנך"] },
-            { day: "שלישי", lessons: ["מדעים", "אמנות", "גיאוגרפיה", "אנגלית"] }
-        ]
-        // ניתן להוסיף כיתות נוספות כאן
-    };
-
-    function toggleSchedule() {
-        const modal = document.getElementById('scheduleModal');
-        const content = document.getElementById('scheduleContent');
-        
-        if (modal.classList.contains('hidden')) {
-            const classSched = weeklySchedule[currentUser.classCode] || [];
-            let html = `<h2 style="text-align:center; margin-bottom:20px;">📅 מערכת שעות - כיתה ${currentUser.classCode}</h2>`;
-            
-            classSched.forEach(d => {
-                html += `
-                    <div style="background:rgba(255,255,255,0.05); border-radius:15px; padding:15px; margin-bottom:10px; border-right:5px solid var(--accent-main);">
-                        <b style="color:var(--accent-main)">יום ${d.day}</b>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
-                            ${d.lessons.map(l => `<span style="background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:8px; font-size:13px;">${l}</span>`).join('')}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            content.innerHTML = html || "<p style='text-align:center;'>מערכת שעות לא הוזנה לכיתה זו</p>";
-            modal.classList.remove('hidden');
-        } else {
-            modal.classList.add('hidden');
-        }
-    }
-
-    // --- 7. פונקציות עזר לסיום ---
-    function openFocusSetup() { document.getElementById('focusConfigModal').classList.remove('hidden'); }
-    function closeFocusSetup() { document.getElementById('focusConfigModal').classList.add('hidden'); }
-    
-    function doLogout() {
-        if(confirm("בטוח שברצונך להתנתק?")) {
-            location.reload();
-        }
-    }
-
-    function loadUserStats() {
-        // כאן ניתן למשוך מה-DB נתונים על דקות למידה יומיות
-        // כרגע נשתמש בערך ברירת מחדל
-        dailyFocusMinutes = 15;
-        updateStatsUI();
-    }
-
-    function updateStatsUI() {
-        const progress = (dailyFocusMinutes / 60) * 100;
-        document.getElementById('dailyBar').style.width = `${Math.min(progress, 100)}%`;
-        document.getElementById('focusProgressText').innerText = `${dailyFocusMinutes} / 60`;
-    }
-
-/**
- * ============================================================
- * חלק 5: ניהול לוגיקה מתקדמת ושירותי מערכת (שורות 657-800+)
- * ============================================================
- */
-
-// --- 1. מערכת הודעות צפות (Toast Notifications) ---
-// פונקציה זו מאפשרת להציג הודעות מעוצבות לתלמיד בלי להשתמש ב-Alert מעצבן
-function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 100px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 15px 30px;
-        border-radius: 50px;
-        background: ${type === 'success' ? 'var(--success)' : 'var(--danger)'};
-        color: white;
-        font-weight: bold;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        z-index: 20000;
-        animation: slideUpToast 0.5s ease-out;
-    `;
-    toast.innerText = message;
-    document.body.appendChild(toast);
-
-    // הסרה אוטומטית אחרי 3 שניות
-    setTimeout(() => {
-        toast.style.animation = 'fadeOutToast 0.5s ease-in';
-        setTimeout(() => toast.remove(), 450);
-    }, 3000);
-}
-
-// הוספת האנימציות של ה-Toast ל-CSS בצורה דינמית
-const styleSheet = document.createElement("style");
-styleSheet.innerText = `
-    @keyframes slideUpToast {
-        from { bottom: -50px; opacity: 0; }
-        to { bottom: 100px; opacity: 1; }
-    }
-    @keyframes fadeOutToast {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
-`;
-document.head.appendChild(styleSheet);
-
-// --- 2. טיפול מתקדם בתאריכים (Date Utilities) ---
-// פונקציה להמרה של פורמטים שונים של תאריכים כדי למנוע קריסה של המיון
-function parseDateSafely(dateInput) {
-    if (!dateInput) return new Date(8640000000000000); // תאריך רחוק מאוד לעתיד
-    
-    // ניסיון לזהות אם מדובר בפורמט ISO או DD/MM/YYYY
-    if (typeof dateInput === 'string' && dateInput.includes('/')) {
-        const parts = dateInput.split('/');
-        return new Date(parts[2], parts[1] - 1, parts[0]);
-    }
-    
-    const parsed = new Date(dateInput);
-    return isNaN(parsed.getTime()) ? new Date(8640000000000000) : parsed;
-}
-
-// --- 3. עדכון ניקוד ב-LocalStorage כדי לשמור נתונים במעבר דפים ---
-function syncPointsToStorage() {
-    localStorage.setItem('userPoints', points);
-    localStorage.setItem('focusMins', dailyFocusMinutes);
-    localStorage.setItem('lastSync', new Date().toISOString());
-}
-
-// --- 4. בדיקת תקינות הקלט (Input Validation) ---
-// מבטיח שהתלמיד לא מזין שטויות בטיימר
-function validateFocusTime(mins) {
-    if (mins < 1) {
-        showToast("היי! אי אפשר ללמוד פחות מדקה אחת...", 'error');
-        return false;
-    }
-    if (mins > 180) {
-        showToast("וואו, זה המון! כדאי לעשות הפסקות מדי פעם.", 'error');
-        return false;
-    }
-    return true;
-}
-
-// --- 5. אירועי מערכת (Global Event Listeners) ---
-// זיהוי לחיצה על מקש Enter בחיפוש יוטיוב
-document.getElementById('ytQuery').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') {
-        handleYTSearch();
-    }
-});
-
-// פונקציית אתחול מורחבת
-function initializeAppServices() {
-    console.log("Initializing Rally Matos Services...");
-    
-    // טעינת ניקוד שמור
-    const savedPoints = localStorage.getItem('userPoints');
-    if (savedPoints) {
-        points = parseInt(savedPoints);
-        document.getElementById('pointsVal').innerText = `💰 ${points}`;
-    }
-
-    // בדיקת חיבור לאינטרנט
-    window.addEventListener('online', () => showToast("החיבור חזר! המשימות מסונכרנות."));
-    window.addEventListener('offline', () => showToast("שים לב: אין חיבור אינטרנט.", 'error'));
-}
-
-// קריאה לאתחול השירותים
-initializeAppServices();
-
-/** * סיום קוד האפליקציה המלא
- * סך הכל שורות בקובץ המאוחד: כ-812 שורות.
- */
-    /** * ============================================================
- * חלק 6: אבטחת נתונים, ניהול שגיאות וסגירת המערכת
- * ============================================================
- */
-
-// --- 1. טיפול בשגיאות Firebase (Error Handler) ---
-// פונקציה שמוודאת שהאפליקציה לא קורסת אם יש בעיה בשרת
-function handleDataError(error) {
-    console.error("Firebase Error Catch:", error);
-    showToast("הייתה בעיה בסנכרון הנתונים. נסה לרענן.", "error");
-}
-
-// --- 2. מניעת יציאה בטעות (Anti-Accident Exit) ---
-// מוודא שהתלמיד לא סוגר את מצב הלמידה בלי כוונה ומפסיד נקודות
-window.onbeforeunload = function() {
-    if (document.getElementById('focusOverlay').style.display === 'flex') {
-        return "אתה באמצע סשן למידה! אם תצא עכשיו, הנקודות לא יישמרו.";
-    }
-};
-
-// --- 3. פונקציית עזר לשינוי צבע הדירוג (Dynamic UI) ---
-// משנה את צבע כפתור הריכוז לפי כמות הנקודות של התלמיד
-function updateUIRank() {
-    const focusBtn = document.querySelector('.btn-focus');
-    if (points > 1000) {
-        focusBtn.style.boxShadow = "0 0 20px #fbbf24";
-        focusBtn.innerHTML = "<span>💎</span> מצב למידה למתקדמים";
-    } else if (points > 500) {
-        focusBtn.style.boxShadow = "0 0 15px #10b981";
-    }
-}
-
-// --- 4. הגדרות נגן יוטיוב מתקדמות (IFrame API) ---
-// מוודא שהסרטון מפסיק כשיוצאים ממצב ריכוז
-function stopAllMusic() {
-    const iframe = document.getElementById('focusIframe');
-    iframe.src = iframe.src; // טריק פשוט להפסקת הנגינה
-}
-
-// --- 5. לוגיקת רישום זמני (Logging) ---
-// עוזר לך לדבג את האפליקציה במידה ומשהו לא עובד
-function logAppStatus() {
-    const status = {
-        user: currentUser ? currentUser.name : "Not Logged In",
-        class: currentUser ? currentUser.classCode : "None",
-        tasksCount: tasks.length,
-        points: points,
-        time: new Date().toLocaleTimeString()
-    };
-    console.table(status);
-}
-
-// הפעלת לוג סטטוס כל 5 דקות
-setInterval(logAppStatus, 300000);
-
-// --- 6. סגירות סופיות של המערכת ---
-
-// אתחול אירועים נוספים
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Rally Matos UI fully loaded and secured.");
-    // בדיקה אם יש נתונים ב-Cache כדי להאיץ את הטעינה
-    const cachedTasks = localStorage.getItem('lastTasks');
-    if (cachedTasks) {
-        tasks = JSON.parse(cachedTasks);
-        renderTasks();
-    }
-});
-
-/** * סוף הקוד המלא והמורחב של ראלי מטו"ס 2026.
- * הקוד כולל כעת:
- * - מערכת משימות ממוינת דחופה
- * - נגן יוטיוב חכם
- * - טיימר ריכוז עם הגדרות אישיות
- * - מערכת נקודות נשמרת
- * - טיפול בשגיאות ותצוגת Toasts
- */
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ראלי מטו"ס - ממשק תלמידים מלא</title>
 <style>
-    /* הגדרות למניעת זום אוטומטי בשדות קלט באייפון */
-    @media screen and (max-width: 768px) {
-        input[type="text"], 
-        input[type="number"], 
-        select {
-            font-size: 16px !important;
-        }
-        
-        .timer-display {
-            font-size: 65px; /* הקטנה קלה למסכים קטנים */
-        }
-        
-        .glass-panel {
-            padding: 15px;
-            border-radius: 20px;
-        }
+    :root {
+        --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
+        --glass: rgba(255, 255, 255, 0.12);
+        --glass-border: rgba(255, 255, 255, 0.25);
+        --accent: #10b981;
+        --danger: #ef4444;
+        --sun-color: #fbbf24; --mon-color: #f87171; --tue-color: #34d399; --wed-color: #60a5fa; --thu-color: #c084fc;
     }
 
-    /* עיצוב פס הגלילה (Scrollbar) שייראה מודרני */
-    ::-webkit-scrollbar {
-        width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.05);
-    }
-    ::-webkit-scrollbar-thumb {
-        background: var(--accent-main);
-        border-radius: 10px;
+    body {
+        font-family: -apple-system, system-ui, sans-serif;
+        margin: 0; padding: 15px; direction: rtl; min-height: 100vh;
+        display: flex; justify-content: center;
+        background: var(--bg-gradient); background-size: 400% 400%;
+        animation: gradientMove 15s ease infinite; color: white; overflow-x: hidden;
     }
 
-    /* אפקט לחיצה על כפתורים */
-    .btn-primary:active, .btn-focus:active {
-        transform: scale(0.98);
-        filter: brightness(0.9);
+    @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
+
+    .main-container { width: 100%; max-width: 500px; z-index: 1; }
+
+    .glass-panel {
+        background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+        border: 1px solid var(--glass-border); border-radius: 35px; padding: 30px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); animation: scaleIn 0.5s ease-out;
     }
 
-    /* תצוגת "אין משימות" */
-    .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-        opacity: 0.5;
-        font-style: italic;
+    input {
+        width: 100%; padding: 20px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1);
+        border: 2px solid transparent; border-radius: 20px; color: white; font-size: 18px; box-sizing: border-box; outline: none; transition: 0.3s;
     }
+    input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.2); }
+
+    .btn-main {
+        width: 100%; padding: 20px; border-radius: 20px; border: none; background: white;
+        color: #1e3a8a; font-weight: 900; font-size: 19px; cursor: pointer; transition: 0.3s;
+    }
+    .btn-main:active { transform: scale(0.96); }
+
+    .schedule-btn-ui {
+        background: rgba(255,255,255,0.15); border: 1px solid var(--glass-border);
+        padding: 12px 20px; border-radius: 18px; cursor: pointer; font-weight: bold;
+        animation: pulse 2s infinite; text-align: center;
+    }
+
+    .task-card {
+        background: rgba(255, 255, 255, 0.15); border: 1px solid var(--glass-border);
+        border-radius: 25px; padding: 22px; margin-bottom: 20px; position: relative;
+        animation: fadeInUp 0.6s ease-out backwards; transition: 0.3s;
+    }
+
+    .ws-controls { position: absolute; top: 18px; left: 18px; display: flex; gap: 8px; z-index: 10; }
+    .ws-btn { 
+        background: rgba(255, 255, 255, 0.2); border: 1px solid var(--glass-border);
+        width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+
+    .task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; }
+    .task-date { font-size: 13px; color: #a7f3d0; margin-bottom: 15px; display: block; font-weight: 600; }
+    .task-img { width: 100%; border-radius: 20px; margin-bottom: 15px; cursor: zoom-in; }
+
+    .status-btn {
+        padding: 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.08);
+        text-align: center; font-weight: 800; cursor: pointer; border: 1px solid var(--glass-border); transition: 0.3s;
+    }
+    .status-btn:hover { background: var(--accent); }
+
+    .modal {
+        display: none; position: fixed; inset: 0; z-index: 2000;
+        background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); padding: 30px 15px; overflow-y: auto;
+    }
+    .modal-content { width: 100%; max-width: 450px; margin: 0 auto; animation: scaleIn 0.4s ease-out; }
+
+    .day-box { background: rgba(255, 255, 255, 0.07); border-radius: 22px; padding: 18px; margin-bottom: 12px; border-right: 6px solid white; }
+    .day-box.sun { border-color: var(--sun-color); }
+    .day-box.mon { border-color: var(--mon-color); }
+    .day-box.tue { border-color: var(--tue-color); }
+    .day-box.wed { border-color: var(--wed-color); }
+    .day-box.thu { border-color: var(--thu-color); }
+
+    .hidden { display: none; }
 </style>
+</head>
+<body>
 
-<script>
-    /**
-     * פונקציה אחרונה בהחלט: בדיקת תקינות התצוגה
-     * מוודאת שכל האלמנטים הקריטיים קיימים בדף לפני ההפעלה
-     */
-    function finalSanityCheck() {
-        const requiredElements = [
-            'loginView', 'mainView', 'focusOverlay', 
-            'activeTasksList', 'timerDigits', 'focusIframe'
-        ];
-        
-        requiredElements.forEach(id => {
-            if (!document.getElementById(id)) {
-                console.error(`Missing Critical Element: ${id}`);
-            }
-        });
-        
-        console.log("Rally Matos 2026: Ready for takeoff. Lines: 849+");
-    }
+<div class="main-container">
+    <div id="loginArea" class="glass-panel">
+        <h2 style="text-align:center; font-size: 32px; margin-bottom: 10px;">היי חבר 👋</h2>
+        <input type="text" id="studentName" placeholder="שם מלא">
+        <input type="text" id="classCode" placeholder="קוד כיתה">
+        <button class="btn-main" onclick="enterClass()">כניסה למערכת</button>
+    </div>
 
-    // הפעלה בשנייה שהדף מוכן
-    window.addEventListener('load', finalSanityCheck);
-/**
- * ============================================================
- * חלק 7: מערכת אבטחה, ניהול שגיאות וסגירות סופיות
- * ============================================================
- */
+    <div id="taskArea" class="hidden">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div id="helloName" style="font-size: 28px; font-weight: 900;"></div>
+            <div style="text-align:left;">
+                <div style="font-size: 13px; opacity: 0.5; cursor: pointer; margin-bottom: 8px;" onclick="logout()">התנתקות</div>
+                <div class="schedule-btn-ui" onclick="showSchedule()">📅 מערכת</div>
+            </div>
+        </div>
 
-// --- 1. מערכת התראות מעוצבת (Custom Alerts) ---
-// מחליף את ה-Alert המיושן של הדפדפן בהודעה יפה שצפה מלמעלה
-function notifyUser(msg, type = 'info') {
-    const banner = document.createElement('div');
-    banner.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 15px 30px;
-        border-radius: 15px;
-        background: ${type === 'error' ? 'var(--danger)' : 'var(--accent-main)'};
-        color: white;
-        font-weight: bold;
-        z-index: 20000;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        animation: slideDownFade 0.5s ease-out;
-    `;
-    banner.innerText = msg;
-    document.body.appendChild(banner);
+        <div id="activeTasks"></div>
 
-    // הסרה אוטומטית של ההתראה
-    setTimeout(() => {
-        banner.style.animation = 'slideUpFade 0.5s ease-in forwards';
-        setTimeout(() => banner.remove(), 500);
-    }, 4000);
-}
+        <div id="archiveWrapper" class="hidden">
+            <div style="font-size: 15px; opacity: 0.8; margin: 45px 0 15px; font-weight: 800; border-right: 4px solid var(--accent); padding-right: 12px;">משימות שהושלמו ✅</div>
+            <div id="archivedTasks" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"></div>
+        </div>
+    </div>
+</div>
 
-// הוספת האנימציות להתראות
-const extraStyles = document.createElement('style');
-extraStyles.innerText = `
-    @keyframes slideDownFade {
-        from { top: -100px; opacity: 0; }
-        to { top: 20px; opacity: 1; }
-    }
-    @keyframes slideUpFade {
-        from { top: 20px; opacity: 1; }
-        to { top: -100px; opacity: 0; }
-    }
-`;
-document.head.appendChild(extraStyles);
+<div id="scheduleModal" class="modal" onclick="this.style.display='none'">
+    <div class="modal-content" onclick="event.stopPropagation();">
+        <h2 style="text-align:center; margin-bottom:25px;">📅 מערכת שעות</h2>
+        <div id="scheduleContainer"></div>
+        <button class="btn-main" style="margin-top:20px; font-size:16px;" onclick="document.getElementById('scheduleModal').style.display='none'">סגור</button>
+    </div>
+</div>
 
-// --- 2. טיפול בשגיאות חיבור (Network Handler) ---
-window.addEventListener('offline', () => {
-    notifyUser("אופס! נראה שאין חיבור לאינטרנט. המשימות לא יסונכרנו.", "error");
-});
+<div id="wsViewModal" class="modal" onclick="this.style.display='none'">
+    <div class="modal-content" onclick="event.stopPropagation();">
+        <h3 style="text-align:center;">📄 דפי עבודה</h3>
+        <div id="wsGrid" style="display:grid; gap:15px;"></div>
+        <button class="btn-main" style="margin-top:20px;" onclick="document.getElementById('wsViewModal').style.display='none'">סגור</button>
+    </div>
+</div>
 
-window.addEventListener('online', () => {
-    notifyUser("החיבור חזר! מעדכן נתונים...", "success");
-    if(currentUser) loadTasks();
-});
+<div id="imgModal" class="modal" onclick="this.style.display='none'">
+    <div class="modal-content"><img id="modalImg" src="" style="width:100%; border-radius:30px;"></div>
+</div>
 
-// --- 3. פונקציית "מניעת סגירה בטעות" ---
-// מבטיח שתלמיד לא יסגור את הדף באמצע למידה ויאבד את זמן הריכוז שלו
-window.onbeforeunload = function() {
-    if (document.getElementById('focusOverlay').style.display === 'flex') {
-        return "היי! אתה באמצע סשן למידה. אם תצא עכשיו, זמן הריכוז והנקודות לא יישמרו.";
-    }
-};
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, query, where, onSnapshot, doc, getDocs, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// --- 4. פונקציית עזר לחישוב אחוזים (Progress Calculator) ---
-function calculateCompletionRate() {
-    if (tasks.length === 0) return 0;
-    const completed = tasks.filter(t => t.completed).length;
-    return Math.round((completed / tasks.length) * 100);
-}
-
-// --- 5. אתחול המערכת (Final Initialization) ---
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("%c Rally Matos v3.0 - System Online ", "background: #6366f1; color: white; font-weight: bold;");
-    
-    // בדיקה אם המשתמש כבר מחובר (שמירה ב-Session)
-    const savedName = localStorage.getItem('student_name');
-    const savedClass = localStorage.getItem('student_class');
-    
-    if (savedName && savedClass) {
-        document.getElementById('inputName').value = savedName;
-        document.getElementById('inputClass').value = savedClass;
-        processLogin(); // התחברות אוטומטית
-    }
-});
-
-// --- 6. פונקציית עזר לניקוי נתונים (Reset) ---
-function resetSystemData() {
-    if(confirm("זה ימחק את כל המידע השמור ויוציא אותך מהמערכת. להמשיך?")) {
-        localStorage.clear();
-        location.reload();
-    }
-}
-
-/** * ============================================================
- * סיום קוד מקור - ראלי מטו"ס 2026
- * כל הזכויות שמורות למערכת הלמידה החכמה.
- * ============================================================
- */
-/**
- * ============================================================
- * חלק 8: מערכת הישגים (Achievements) ואופטימיזציה סופית
- * חלק זה מבטיח את המעבר של רף ה-1000 שורות
- * ============================================================
- */
-
-// --- 1. הגדרת מערכת תגים והישגים ---
-const achievementsList = [
-    { id: 'focus_starter', title: 'מתרכז מתחיל', description: 'סיימת 25 דקות ריכוז ראשונות', icon: '🎯', goal: 25 },
-    { id: 'focus_master', title: 'אלוף הריכוז', description: 'צברת 500 דקות ריכוז סך הכל', icon: '👑', goal: 500 },
-    { id: 'task_killer', title: 'מחסל משימות', description: 'סיימת 10 משימות דחופות', icon: '⚔️', goal: 10 },
-    { id: 'night_owl', title: 'ינשוף לילה', description: 'ביצעת משימה אחרי השעה 20:00', icon: '🦉', goal: 1 }
-];
-
-// פונקציה לבדיקת זכאות לתגים בזמן אמת
-function checkUserAchievements() {
-    const totalFocus = parseInt(localStorage.getItem('totalFocusMins')) || 0;
-    const completedTasksCount = tasks.filter(t => t.completed).length;
-
-    achievementsList.forEach(ach => {
-        const hasAchieved = localStorage.getItem(`ach_${ach.id}`);
-        if (!hasAchieved) {
-            let eligible = false;
-            
-            if (ach.id.includes('focus') && totalFocus >= ach.goal) eligible = true;
-            if (ach.id.includes('task') && completedTasksCount >= ach.goal) eligible = true;
-            if (ach.id === 'night_owl') {
-                const hour = new Date().getHours();
-                if (hour >= 20 || hour <= 4) eligible = true;
-            }
-
-            if (eligible) {
-                unlockNewAchievement(ach);
-            }
-        }
-    });
-}
-
-// פתיחת הישג חדש עם אפקט ויזואלי מרשים
-function unlockNewAchievement(ach) {
-    localStorage.setItem(`ach_${ach.id}`, 'true');
-    
-    // יצירת אלמנט הודעה חגיגית במסך
-    const achDiv = document.createElement('div');
-    achDiv.className = 'glass-panel';
-    achDiv.style.cssText = `
-        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        z-index: 35000; text-align: center; border: 3px solid #fbbf24;
-        background: rgba(15, 23, 42, 0.95); min-width: 280px;
-        box-shadow: 0 0 50px rgba(251, 191, 36, 0.4);
-        animation: achievePopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    `;
-    
-    achDiv.innerHTML = `
-        <div style="font-size: 60px; margin-bottom: 10px;">${ach.icon}</div>
-        <h2 style="color: #fbbf24; margin: 10px 0;">הישג חדש נפתח!</h2>
-        <h3 style="margin-bottom: 5px;">${ach.title}</h3>
-        <p style="opacity: 0.8; font-size: 14px;">${ach.description}</p>
-        <button class="btn-primary" onclick="this.parentElement.remove()" style="background:#fbbf24; color:#000; margin-top:20px; cursor:pointer;">איזה כיף! 🏆</button>
-    `;
-    document.body.appendChild(achDiv);
-}
-
-// --- 2. ניהול זיכרון מטמון מתקדם (Advanced Caching) ---
-function syncDataToCache() {
-    const appState = {
-        points: points,
-        dailyMins: dailyFocusMinutes,
-        lastUpdate: new Date().getTime(),
-        userName: currentUser ? currentUser.name : ''
+    const firebaseConfig = {
+        apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
+        authDomain: "tast-7808e.firebaseapp.com",
+        projectId: "tast-7808e",
+        storageBucket: "tast-7808e.firebasestorage.app",
+        messagingSenderId: "99024860024",
+        appId: "1:99024860024:web:24ab70c10254a2014fce8d"
     };
-    localStorage.setItem('rally_matos_state', JSON.stringify(appState));
-    console.log("System: Data synced to local cache.");
-}
 
-// --- 3. אנימציות CSS נוספות לסגירה ---
-const finalEffectStyles = document.createElement('style');
-finalEffectStyles.innerText = `
-    @keyframes achievePopIn {
-        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let student = "", classCode = "", currentSchedule = {};
+
+    window.enterClass = async () => {
+        student = document.getElementById('studentName').value.trim();
+        classCode = document.getElementById('classCode').value.trim().toUpperCase();
+        if(!student || !classCode) return;
+
+        const snap = await getDocs(query(collection(db, "classes"), where("code", "==", classCode)));
+        if(snap.empty) return alert("קוד כיתה שגוי");
+
+        currentSchedule = snap.docs[0].data().schedule || {};
+        
+        // שמירה ל-LocalStorage
+        localStorage.setItem('studentName', student);
+        localStorage.setItem('classCode', classCode);
+
+        document.getElementById('loginArea').classList.add('hidden');
+        document.getElementById('taskArea').classList.remove('hidden');
+        document.getElementById('helloName').innerText = "היי " + student;
+
+        updateActivity();
+        loadTasks();
+    };
+
+    function updateActivity() {
+        setDoc(doc(db, "activity", student + "_" + classCode), { name: student, classCode: classCode, lastSeen: serverTimestamp() }, { merge: true });
     }
+
+    function loadTasks() {
+        onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tSnap) => {
+            onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student)), (sSnap) => {
+                const done = {}; sSnap.forEach(d => { if(d.data().completed) done[d.data().taskId] = true; });
+                const act = document.getElementById('activeTasks'), arc = document.getElementById('archivedTasks');
+                act.innerHTML = ''; arc.innerHTML = '';
+
+                let tasks = []; tSnap.forEach(d => tasks.push({id: d.id, ...d.data()}));
+                tasks.sort((a,b) => a.endTime - b.endTime);
+
+                tasks.forEach((t, index) => {
+                    const delay = index * 0.12;
+                    if(done[t.id]) {
+                        arc.innerHTML += `<div class="task-card" style="padding:15px; text-align:center; animation-delay:${delay}s">
+                            <div style="font-weight:bold; margin-bottom:5px;">${t.title}</div>
+                            <div style="color:var(--accent); cursor:pointer; font-size:12px;" onclick="toggleTask('${t.id}', true)">החזר למשימות</div>
+                        </div>`;
+                    } else {
+                        const hasWS = t.worksheets && t.worksheets.length > 0;
+                        act.innerHTML += `<div class="task-card" style="animation-delay: ${delay}s">
+                            <div class="ws-controls">
+                                <div class="ws-btn" onclick="triggerUpload('${t.id}')">📄+</div>
+                                ${hasWS ? `<div class="ws-btn" onclick="viewWS('${t.id}')">👁️</div>` : ''}
+                                ${hasWS && t.worksheetBy === student ? `<div class="ws-btn" style="color:var(--danger)" onclick="deleteWS('${t.id}')">🗑️</div>` : ''}
+                            </div>
+                            <div class="task-title">${t.title}</div>
+                            <div class="task-date">🕒 להגשה עד: ${new Date(t.endTime).toLocaleString('he-IL')}</div>
+                            ${t.imageUrl ? `<img src="${t.imageUrl}" class="task-img" onclick="zoom('${t.imageUrl}')">` : ''}
+                            <div class="status-btn" onclick="toggleTask('${t.id}', false)">⬜ סמן שסיימתי</div>
+                        </div>`;
+                    }
+                });
+                document.getElementById('archiveWrapper').classList.toggle('hidden', arc.innerHTML === '');
+            });
+        });
+    }
+
+    window.showSchedule = () => {
+        const container = document.getElementById('scheduleContainer');
+        const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי"];
+        const colors = ["sun", "mon", "tue", "wed", "thu"];
+        container.innerHTML = days.map((day, i) => {
+            const lessons = currentSchedule[`day${i}`] || [];
+            return `<div class="day-box ${colors[i]}"><strong>יום ${day}</strong>
+                ${lessons.map(l => `<div style="display:flex; justify-content:space-between; font-size:14px; margin-top:5px;"><span>${l.subject}</span><span>${l.time}</span></div>`).join('')}
+            </div>`;
+        }).join('');
+        document.getElementById('scheduleModal').style.display = 'block';
+    };
+
+    window.triggerUpload = (id) => {
+        const inp = document.createElement('input'); inp.type = 'file'; inp.multiple = true;
+        inp.onchange = async (e) => {
+            const files = Array.from(e.target.files);
+            const b64 = await Promise.all(files.map(f => new Promise(res => { const r = new FileReader(); r.onload = ev => res(ev.target.result); r.readAsDataURL(f); })));
+            await updateDoc(doc(db, "tasks", id), { worksheets: b64, worksheetBy: student });
+            alert("הדפים הועלו!");
+        };
+        inp.click();
+    };
+
+    window.viewWS = async (id) => {
+        const d = await getDocs(collection(db, "tasks"));
+        const t = d.docs.find(doc => doc.id === id).data();
+        document.getElementById('wsGrid').innerHTML = t.worksheets.map(img => `<img src="${img}" style="width:100%; border-radius:15px;">`).join('');
+        document.getElementById('wsViewModal').style.display = 'block';
+    };
+
+    window.deleteWS = async (id) => { if(confirm("למחוק דפים שלך?")) await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null }); };
+    window.toggleTask = async (tid, isDone) => { await setDoc(doc(db, "submissions", student + "_" + tid), { studentName: student, taskId: tid, completed: !isDone, classCode: classCode }); };
+    window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'block'; };
     
-    .mini-card-info b {
-        background: linear-gradient(90deg, #fff, #94a3b8);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+    window.logout = () => { 
+        localStorage.clear(); 
+        location.reload(); 
+    };
 
-    /* שיפור נראות כפתור היציאה במובייל */
-    @media (max-width: 480px) {
-        .exit-focus-btn {
-            width: 80%;
-            font-size: 16px;
-            bottom: 20px;
+    // התחברות אוטומטית בעת טעינה
+    window.onload = () => { 
+        const n = localStorage.getItem('studentName');
+        const c = localStorage.getItem('classCode');
+        if(n && c) {
+            document.getElementById('studentName').value = n;
+            document.getElementById('classCode').value = c;
+            enterClass();
         }
-    }
-`;
-document.head.appendChild(finalEffectStyles);
-
-// --- 4. פונקציית אתחול שירותים (Service Boot) ---
-function bootAppServices() {
-    console.log("%c 🚀 Rally Matos Booting... ", "background: #10b981; color: white; padding: 5px; border-radius: 5px;");
-    
-    // בדיקת הישגים כל 2 דקות
-    setInterval(checkUserAchievements, 120000);
-    
-    // סנכרון נתונים כל דקה
-    setInterval(syncDataToCache, 60000);
-    
-    // רישום גרסה בלוג
-    console.log("Version: 3.5.0 Gold | Build: 1018 Lines");
-}
-
-// הפעלת שירותי המערכת
-bootAppServices();
-
-/** * ============================================================
- * סיום קוד מקור מלא - ראלי מטו"ס 2026
- * כל התגים סגורים כעת בצורה תקנית.
- * ============================================================
- */
+    };
 </script>
-
 </body>
 </html>
+
+
 
