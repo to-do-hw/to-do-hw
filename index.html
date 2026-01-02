@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ראלי מטו"ס - ממשק תלמידים מלא</title>
+    <title>ראלי מטו"ס - ממשק תלמידים מלא עם אנימציות</title>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
@@ -22,10 +22,16 @@
             animation: gradientMove 15s ease infinite; color: white; overflow-x: hidden;
         }
 
+        /* --- אנימציות --- */
         @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes scaleIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
+        @keyframes softShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px) rotate(-0.5deg); }
+            75% { transform: translateX(2px) rotate(0.5deg); }
+        }
 
         .main-container { width: 100%; max-width: 500px; z-index: 1; }
 
@@ -58,22 +64,27 @@
             border-radius: 25px; padding: 22px; margin-bottom: 20px; position: relative;
             animation: fadeInUp 0.6s ease-out backwards; transition: 0.3s;
         }
+        .task-card.overdue {
+            animation: fadeInUp 0.6s ease-out backwards, softShake 4s ease-in-out infinite;
+        }
 
         .ws-controls { position: absolute; top: 18px; left: 18px; display: flex; gap: 8px; z-index: 10; }
         .ws-btn {
             background: rgba(255, 255, 255, 0.2); border: 1px solid var(--glass-border);
-            width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
         }
+        .ws-btn:hover { background: rgba(255,255,255,0.4); }
 
         .task-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; }
         .task-date { font-size: 13px; color: #a7f3d0; margin-bottom: 15px; display: block; font-weight: 600; }
-        .task-img { width: 100%; border-radius: 20px; margin-bottom: 15px; cursor: zoom-in; }
+        .task-img { width: 100%; border-radius: 20px; margin-bottom: 15px; cursor: zoom-in; transition: 0.3s; }
+        .task-img:hover { transform: scale(1.02); }
 
         .status-btn {
             padding: 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.08);
             text-align: center; font-weight: 800; cursor: pointer; border: 1px solid var(--glass-border); transition: 0.3s;
         }
-        .status-btn:hover { background: var(--accent); }
+        .status-btn:hover { background: var(--accent); transform: translateY(-2px); }
 
         .modal {
             display: none; position: fixed; inset: 0; z-index: 2000;
@@ -81,7 +92,8 @@
         }
         .modal-content { width: 100%; max-width: 450px; margin: 0 auto; animation: scaleIn 0.4s ease-out; }
 
-        .day-box { background: rgba(255, 255, 255, 0.07); border-radius: 22px; padding: 18px; margin-bottom: 12px; border-right: 6px solid white; }
+        .day-box { background: rgba(255, 255, 255, 0.07); border-radius: 22px; padding: 18px; margin-bottom: 12px; border-right: 6px solid white; transition: 0.3s; }
+        .day-box:hover { background: rgba(255, 255, 255, 0.12); }
         .day-box.sun { border-color: var(--sun-color); }
         .day-box.mon { border-color: var(--mon-color); }
         .day-box.tue { border-color: var(--tue-color); }
@@ -123,7 +135,7 @@
     <div class="modal-content" onclick="event.stopPropagation();">
         <h2 style="text-align:center; margin-bottom:25px;">📅 מערכת שעות</h2>
         <div id="scheduleContainer"></div>
-        <button class="btn-main" style="margin-top:20px; font-size:16px;" onclick="document.getElementById('scheduleModal').style.display='none'">סגור</button>
+        <button class="btn-main" style="margin-top:20px;" onclick="document.getElementById('scheduleModal').style.display='none'">סגור</button>
     </div>
 </div>
 
@@ -197,7 +209,7 @@
                 const daysArr = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
 
                 tasks.forEach((t, index) => {
-                    const delay = index * 0.12;
+                    const delay = (index * 0.1).toFixed(2);
                     const isOverdue = now > t.endTime;
                     const dateObj = new Date(t.endTime);
                     const dayName = daysArr[dateObj.getDay()];
@@ -210,11 +222,12 @@
                     } else {
                         const hasWS = t.worksheets && t.worksheets.length > 0;
                         const overdueStyle = isOverdue ? 'background: rgba(239, 68, 68, 0.25); border-color: var(--danger);' : '';
+                        const overdueClass = isOverdue ? 'overdue' : '';
                         
                         act.innerHTML += `
-                            <div class="task-card" style="animation-delay: ${delay}s; ${overdueStyle}">
+                            <div class="task-card ${overdueClass}" style="animation-delay: ${delay}s; ${overdueStyle}">
                                 <div class="ws-controls">
-                                    <div class="ws-btn" onclick="triggerUpload('${t.id}')">📄+</div>
+                                    <div class="ws-btn" onclick="triggerUpload('${t.id}')" title="העלאת דפים">📄+</div>
                                     ${hasWS ? `<div class="ws-btn" onclick="viewWS('${t.id}')">👁️</div>` : ''}
                                     ${hasWS && t.worksheetBy === student ? `<div class="ws-btn" style="color:var(--danger)" onclick="deleteWS('${t.id}')">🗑️</div>` : ''}
                                 </div>
@@ -234,6 +247,7 @@
         });
     }
 
+    // שאר הפונקציות נשארו ללא שינוי לטובת יציבות
     window.showSchedule = () => {
         const container = document.getElementById('scheduleContainer');
         const daysArr = ["ראשון", "שני", "שלישי", "רביעי", "חמישי"];
@@ -268,7 +282,6 @@
     window.deleteWS = async (id) => { if(confirm("למחוק דפים שלך?")) await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null }); };
     window.toggleTask = async (tid, isDone) => { await setDoc(doc(db, "submissions", student + "_" + tid), { studentName: student, taskId: tid, completed: !isDone, classCode: classCode }); };
     window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'block'; };
-    
     window.logout = () => { localStorage.clear(); location.reload(); };
 
     window.onload = () => {
