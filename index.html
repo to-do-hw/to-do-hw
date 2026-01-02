@@ -98,8 +98,13 @@
 <div id="timerOverlay">
     <div id="countdownTimer" style="font-weight: 900; font-size: 80px; text-shadow: 0 0 25px rgba(255,255,255,0.3);">00:00</div>
     
-    <div id="ytBrowser">
-        <iframe id="ytIframe" width="100%" height="100%" src="https://www.youtube.com/embed?listType=search&list=lofi+music+study" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+    <div id="ytBrowser" style="display: flex; flex-direction: column; background: #000;">
+        <div style="display: flex; gap: 5px; padding: 10px; background: rgba(255,255,255,0.1);">
+            <input type="text" id="ytSearchInput" placeholder="חפש מוזיקה לריכוז..." style="margin:0; padding:10px; font-size:14px; flex:1; height:40px; border-radius:10px;">
+            <button onclick="searchYoutube()" style="width:70px; height:40px; background:var(--accent); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">חפש</button>
+        </div>
+        
+        <iframe id="ytIframe" width="100%" height="100%" src="https://www.youtube.com/embed?source=search" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; clipboard-write" allowfullscreen></iframe>
     </div>
 
     <button class="btn-main" style="width:250px; background:var(--danger); color:white; margin-top:25px;" onclick="closeFocusMode()">סיים מוקדם וצא</button>
@@ -294,6 +299,14 @@ window.closeFocusMode = () => {
     document.getElementById('timerOverlay').style.display = 'none'; 
 };
 
+// הפונקציה החדשה שמוסיפים כאן:
+window.searchYoutube = () => {
+    const query = document.getElementById('ytSearchInput').value;
+    if (!query) return;
+    const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}`;
+    document.getElementById('ytIframe').src = searchUrl;
+};
+
 function refreshPoints() {
     const today = new Date().toLocaleDateString();
     const f = parseInt(localStorage.getItem('f_' + today)) || 0;
@@ -304,6 +317,7 @@ function refreshPoints() {
     
     const progress = Math.min((f / 60) * 100, 100);
     document.getElementById('progressBar').style.width = progress + "%";
+}
 }
 
 // ניהול מערכת שעות (עם הצבעים המקוריים)
@@ -418,3 +432,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
