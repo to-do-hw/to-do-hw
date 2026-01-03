@@ -3,132 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ראלי מטו"ס - ממשק תלמידים מלא</title>
+<title>ראלי מטו"ס - ממשק תלמידים</title>
 <style>
     :root {
         --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
         --glass: rgba(255, 255, 255, 0.12);
         --glass-border: rgba(255, 255, 255, 0.25);
-        --accent: #10b981;
-        --danger: #ef4444;
+        --accent: #10b981; --danger: #ef4444;
         --sun-color: #fbbf24; --mon-color: #f87171; --tue-color: #34d399; --wed-color: #60a5fa; --thu-color: #c084fc;
     }
 
     body {
-        font-family: -apple-system, system-ui, sans-serif;
-        margin: 0; padding: 15px; direction: rtl; min-height: 100vh;
-        background: var(--bg-gradient); background-size: 400% 400%;
-        animation: gradientBG 15s ease infinite; color: white;
+        font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 15px;
+        direction: rtl; min-height: 100vh; color: white;
+        background: var(--bg-gradient); background-attachment: fixed;
     }
-
-    @keyframes gradientBG { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
 
     .glass-panel {
         background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-        border-radius: 30px; border: 1px solid var(--glass-border); padding: 25px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.3); margin-bottom: 20px;
+        border-radius: 25px; border: 1px solid var(--glass-border); padding: 20px; margin-bottom: 15px;
     }
 
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+    /* טאבים קטנים למעלה */
+    .tabs { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; }
     .tab { 
-        padding: 10px 20px; border-radius: 15px; background: rgba(255,255,255,0.1); 
-        cursor: pointer; border: 1px solid var(--glass-border); white-space: nowrap; transition: 0.3s;
+        padding: 8px 15px; border-radius: 12px; background: rgba(255,255,255,0.1); 
+        cursor: pointer; font-size: 13px; border: 1px solid var(--glass-border); white-space: nowrap;
     }
     .tab.active { background: white; color: #1e3a8a; font-weight: bold; }
 
-    input {
-        width: 100%; padding: 18px; margin-bottom: 15px; border-radius: 18px; border: none;
-        background: rgba(255,255,255,0.1); color: white; font-size: 18px; box-sizing: border-box;
-        border: 1px solid var(--glass-border);
-    }
-
-    .btn-primary {
-        width: 100%; padding: 18px; border-radius: 18px; border: none;
-        background: white; color: #1e3a8a; font-weight: 900; font-size: 18px; cursor: pointer;
-    }
-
+    /* כרטיסיית משימה - בדיוק כמו במקור */
     .task-card {
         background: rgba(255, 255, 255, 0.15); border-radius: 25px; padding: 20px;
-        margin-bottom: 20px; border: 1px solid var(--glass-border); position: relative;
+        margin-bottom: 20px; border: 1px solid var(--glass-border);
     }
 
-    .status-badge {
-        padding: 8px 15px; border-radius: 12px; font-weight: bold; font-size: 14px;
-        display: inline-block; margin-bottom: 10px;
+    .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .task-title { font-size: 19px; font-weight: bold; margin: 0; }
+    .task-date { font-size: 12px; opacity: 0.8; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 10px; }
+
+    .img-preview { width: 100%; border-radius: 15px; margin: 10px 0; border: 1px solid var(--glass-border); cursor: zoom-in; }
+
+    /* כפתורים לא מגושמים */
+    .btn-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-top: 15px; }
+    button { 
+        padding: 12px; border-radius: 15px; border: none; font-weight: bold; 
+        font-size: 14px; cursor: pointer; transition: 0.2s;
     }
+    .btn-main { background: white; color: #1e3a8a; }
+    .btn-sub { background: rgba(255,255,255,0.15); color: white; border: 1px solid white; }
 
-    .done { background: var(--accent); color: white; }
-    .pending { background: var(--danger); color: white; }
-
-    .img-preview { width: 100%; border-radius: 20px; margin-top: 10px; border: 1px solid var(--glass-border); cursor: zoom-in; max-height: 200px; object-fit: cover; }
-
-    .schedule-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scroll-snap-type: x mandatory; }
-    .day-col { 
-        min-width: 140px; background: rgba(0,0,0,0.2); border-radius: 20px; padding: 12px; 
-        scroll-snap-align: start; flex: 1;
-    }
+    /* מערכת שעות מקורית */
+    .schedule-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+    .day-col { min-width: 140px; background: rgba(0,0,0,0.25); border-radius: 20px; padding: 12px; }
     .lesson-box {
-        background: rgba(255,255,255,0.08); border-radius: 12px; padding: 8px; margin-top: 8px;
-        font-size: 13px; text-align: center; border-right: 3px solid white;
+        background: rgba(255,255,255,0.08); border-radius: 12px; padding: 10px; margin-top: 10px;
+        font-size: 13px; text-align: center; border-right: 4px solid white;
     }
 
+    input { width: 100%; padding: 16px; margin-bottom: 12px; border-radius: 15px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: white; box-sizing: border-box; font-size: 16px; }
     .hidden { display: none; }
-    #notifBanner { background: var(--accent); color: white; padding: 10px; text-align: center; border-radius: 15px; margin-bottom: 15px; font-weight: bold; }
-
-    .modal {
-        display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.9); padding: 20px; box-sizing: border-box; overflow-y: auto;
-    }
-    .modal-content { max-width: 100%; margin: auto; display: block; }
+    #notifBanner { background: var(--accent); color: white; padding: 12px; text-align: center; border-radius: 15px; margin-bottom: 15px; font-weight: bold; }
+    
+    .modal { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; box-sizing: border-box; overflow-y: auto; }
 </style>
 </head>
-<body>
-
-<div id="loginArea" class="glass-panel" style="max-width: 400px; margin: 100px auto;">
-    <h1 style="text-align:center;">ראלי מטו"ס 🚀</h1>
-    <input type="text" id="studentName" placeholder="שם התלמיד">
-    <input type="text" id="classCode" placeholder="קוד כיתה">
-    <button class="btn-primary" onclick="enterClass()">כניסה לשיעור</button>
-</div>
-
-<div id="taskArea" class="hidden">
-    <div id="notifBanner" class="hidden">🔔 משימה חדשה פורסמה! רעננו את הדף</div>
-
-    <div class="glass-panel" style="padding:15px; display:flex; justify-content:space-between; align-items:center;">
-        <h3 id="helloTitle" style="margin:0;">שלום תלמיד</h3>
-        <button onclick="logout()" style="background:none; border:1px solid white; color:white; border-radius:10px; padding:5px 10px; cursor:pointer;">יציאה</button>
-    </div>
-
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('active')">משימות לביצוע ⏳</div>
-        <div class="tab" onclick="switchTab('archive')">ארכיון הגשות ✅</div>
-        <div class="tab" onclick="switchTab('schedule')">מערכת שעות 📅</div>
-    </div>
-
-    <div id="tab-active"></div>
-    <div id="tab-archive" class="hidden"></div>
-    <div id="tab-schedule" class="hidden">
-        <div class="glass-panel">
-            <div id="scheduleContainer" class="schedule-grid"></div>
-        </div>
-    </div>
-</div>
-
-<div id="imgModal" class="modal" onclick="this.style.display='none'">
-    <img id="modalImg" class="modal-content">
-</div>
-
-<div id="wsViewModal" class="modal">
-    <div class="glass-panel" style="margin-top:50px;">
-        <h2 style="text-align:center;">דפי העבודה שהעלית</h2>
-        <div id="wsGrid"></div>
-        <button class="btn-primary" onclick="document.getElementById('wsViewModal').style.display='none'">סגור</button>
-    </div>
-</div>
-<script type="module">
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, query, where, onSnapshot, doc, getDocs, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // הגדרות Firebase המקוריות
     const firebaseConfig = {
         apiKey: "AIzaSyDvnS8L9r2LMKcUD78Ix7bldVp9qzbYwtk",
         authDomain: "tast-7808e.firebaseapp.com",
@@ -140,127 +84,182 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let student = "", classCode = "";
+    let student = "";
+    let classCode = "";
 
-    // ניהול טאבים - תיקון כדי שיעבוד עם ה-IDs
+    // פונקציית טאבים מלאה
     window.switchTab = (tabName) => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const tabs = document.querySelectorAll('.tab');
+        const contents = ['active', 'archive', 'schedule'];
+        
+        tabs.forEach(t => t.classList.remove('active'));
         event.currentTarget.classList.add('active');
-        document.getElementById('tab-active').classList.add('hidden');
-        document.getElementById('tab-archive').classList.add('hidden');
-        document.getElementById('tab-schedule').classList.add('hidden');
+
+        contents.forEach(id => {
+            document.getElementById('tab-' + id).classList.add('hidden');
+        });
         document.getElementById('tab-' + tabName).classList.remove('hidden');
     };
 
+    // פונקציית כניסה מקורית
     window.enterClass = async () => {
         student = document.getElementById('studentName').value.trim();
         classCode = document.getElementById('classCode').value.trim().toUpperCase();
         
-        if(!student || !classCode) return;
+        if (!student || !classCode) {
+            alert("אנא מלא את כל השדות");
+            return;
+        }
 
         const q = query(collection(db, "classes"), where("code", "==", classCode));
-        const snap = await getDocs(q);
+        const querySnapshot = await getDocs(q);
         
-        if(snap.empty) { alert("כיתה לא נמצאה"); return; }
+        if (querySnapshot.empty) {
+            alert("קוד כיתה לא נמצא במערכת");
+            return;
+        }
 
         localStorage.setItem('studentName', student);
         localStorage.setItem('classCode', classCode);
         
         document.getElementById('loginArea').classList.add('hidden');
         document.getElementById('taskArea').classList.remove('hidden');
-        document.getElementById('helloTitle').innerText = `היי, ${student}`;
+        document.getElementById('helloTitle').innerText = `היי, ${student} 👋`;
 
-        if ("Notification" in window) Notification.requestPermission();
-        startListeners();
+        // הפעלת התראות וטעינת נתונים
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+        
+        startApp();
     };
 
-    function startListeners() {
-        // האזנה להתראות (חדש)
-        onSnapshot(query(collection(db, "notifications"), where("classCode", "==", classCode)), (snap) => {
-            snap.docChanges().forEach(change => {
+    function startApp() {
+        loadSchedule();
+        loadTasks();
+        listenForNotifications();
+        updateActivity();
+        setInterval(updateActivity, 120000); // עדכון כל 2 דקות
+    }
+
+    // האזנה להתראות (חדש)
+    function listenForNotifications() {
+        const q = query(collection(db, "notifications"), where("classCode", "==", classCode));
+        onSnapshot(q, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
                     const data = change.doc.data();
-                    if (Date.now() - data.timestamp?.toMillis() < 10000) {
+                    const now = Date.now();
+                    const notifTime = data.timestamp?.toMillis() || 0;
+                    
+                    if (now - notifTime < 15000) { // התראה רק על משימות מה-15 שניות האחרונות
                         document.getElementById('notifBanner').classList.remove('hidden');
-                        if (Notification.permission === "granted") new Notification("משימה חדשה פורסמה!");
+                        if (Notification.permission === "granted") {
+                            new Notification("משימה חדשה מהמורה!", { body: data.body });
+                        }
                     }
                 }
             });
         });
+    }
 
-        // טעינת מערכת שעות (מקורי)
-        onSnapshot(query(collection(db, "classes"), where("code", "==", classCode)), (snap) => {
-            if(snap.empty) return;
-            const data = snap.docs[0].data().schedule || {};
+    // טעינת מערכת שעות המקורית
+    function loadSchedule() {
+        const q = query(collection(db, "classes"), where("code", "==", classCode));
+        onSnapshot(q, (snapshot) => {
+            if (snapshot.empty) return;
+            const classData = snapshot.docs[0].data();
+            const schedule = classData.schedule || {};
             const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי"];
             const colors = ["--sun-color", "--mon-color", "--tue-color", "--wed-color", "--thu-color"];
             
-            document.getElementById('scheduleContainer').innerHTML = days.map((day, i) => {
-                const dayLessons = data[`day${i}`] || [];
-                return `
+            let html = "";
+            days.forEach((day, i) => {
+                const dayLessons = schedule[`day${i}`] || [];
+                html += `
                     <div class="day-col">
-                        <div style="color:var(${colors[i]}); font-weight:bold; text-align:center;">${day}</div>
-                        ${dayLessons.map(l => `<div class="lesson-box" style="border-color:var(${colors[i]})"><b>${l.subject}</b><br>${l.time}</div>`).join('')}
-                    </div>`;
-            }).join('');
-        });
-
-        // טעינת משימות וארכיון (מקורי עם חלוקה לטאבים)
-        onSnapshot(query(collection(db, "tasks"), where("classCode", "==", classCode)), (tSnap) => {
-            onSnapshot(query(collection(db, "submissions"), where("studentName", "==", student)), (sSnap) => {
-                const subs = {};
-                sSnap.forEach(doc => { if(doc.data().completed) subs[doc.data().taskId] = true; });
-
-                const activeCont = document.getElementById('tab-active');
-                const archiveCont = document.getElementById('tab-archive');
-                activeCont.innerHTML = ''; archiveCont.innerHTML = '';
-
-                tSnap.forEach(docSnap => {
-                    const t = docSnap.data();
-                    const tid = docSnap.id;
-                    const isDone = subs[tid] || false;
-                    const hasWS = t.worksheetBy === student;
-
-                    const html = `
-                        <div class="task-card">
-                            <span class="status-badge ${isDone?'done':'pending'}">${isDone?'בוצע':'לביצוע'}</span>
-                            <div style="font-weight:bold; font-size:18px;">${t.title}</div>
-                            <div style="font-size:12px; opacity:0.7;">עד: ${new Date(t.endTime).toLocaleString('he-IL')}</div>
-                            ${t.imageUrl ? `<img src="${t.imageUrl}" class="img-preview" onclick="zoom('${t.imageUrl}')">` : ''}
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
-                                <button onclick="toggleTask('${tid}', ${isDone})" style="background:${isDone?'rgba(255,255,255,0.2)':'var(--accent)'}; color:white; border-radius:12px; padding:10px; font-weight:bold;">
-                                    ${isDone ? 'החזר לביצוע' : 'סמנתי כבוצע'}
-                                </button>
-                                <button onclick="uploadWorksheet('${tid}')" style="background:none; border:1px solid white; color:white; border-radius:12px; padding:10px;">📸 צלם דף</button>
+                        <div style="color: var(${colors[i]}); font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 16px;">${day}</div>
+                        ${dayLessons.map(l => `
+                            <div class="lesson-box" style="border-color: var(${colors[i]});">
+                                <div style="font-weight: bold; color: white;">${l.subject}</div>
+                                <div style="font-size: 11px; opacity: 0.8;">${l.time}</div>
                             </div>
-                            ${hasWS ? `<div style="text-align:center; margin-top:10px; font-size:13px;">
-                                <span onclick="viewWS('${tid}')" style="text-decoration:underline; cursor:pointer;">צפה בדף שלי</span> | 
-                                <span onclick="deleteWS('${tid}')" style="color:var(--danger); cursor:pointer;">מחק</span>
-                            </div>` : ''}
+                        `).join('')}
+                    </div>`;
+            });
+            document.getElementById('scheduleContainer').innerHTML = html;
+        });
+    }
+
+    // טעינת משימות וארכיון המקורית
+    function loadTasks() {
+        const tasksQuery = query(collection(db, "tasks"), where("classCode", "==", classCode));
+        onSnapshot(tasksQuery, (tasksSnapshot) => {
+            const submissionsQuery = query(collection(db, "submissions"), where("studentName", "==", student));
+            onSnapshot(submissionsQuery, (subsSnapshot) => {
+                const completedTasks = {};
+                subsSnapshot.forEach(doc => {
+                    if (doc.data().completed) completedTasks[doc.data().taskId] = true;
+                });
+
+                const activeList = document.getElementById('tab-active');
+                const archiveList = document.getElementById('tab-archive');
+                activeList.innerHTML = "";
+                archiveList.innerHTML = "";
+
+                tasksSnapshot.forEach((docSnap) => {
+                    const task = docSnap.data();
+                    const taskId = docSnap.id;
+                    const isDone = completedTasks[taskId] || false;
+                    const dateStr = new Date(task.endTime).toLocaleDateString('he-IL', {day: 'numeric', month: 'numeric'});
+
+                    const taskHtml = `
+                        <div class="task-card">
+                            <div class="task-header">
+                                <h3 class="task-title">${task.title}</h3>
+                                <span class="task-date">עד ה-${dateStr}</span>
+                            </div>
+                            
+                            ${task.imageUrl ? `<img src="${task.imageUrl}" class="img-preview" onclick="zoom('${task.imageUrl}')">` : ''}
+                            
+                            <div class="btn-row">
+                                <button class="btn-main" onclick="toggleTask('${taskId}', ${isDone})" 
+                                    style="background: ${isDone ? 'var(--accent)' : 'white'}; color: ${isDone ? 'white' : '#1e3a8a'};">
+                                    ${isDone ? 'בוצע ✅' : 'סיימתי!'}
+                                </button>
+                                <button class="btn-sub" onclick="uploadWorksheet('${taskId}')">📸 צלם דף</button>
+                            </div>
+
+                            ${task.worksheetBy === student ? `
+                                <div style="text-align: center; margin-top: 12px; font-size: 13px;">
+                                    <span onclick="viewWS('${taskId}')" style="color: var(--accent); cursor: pointer; text-decoration: underline;">צפה בדף שלי</span> | 
+                                    <span onclick="deleteWS('${taskId}')" style="color: var(--danger); cursor: pointer; text-decoration: underline;">מחק</span>
+                                </div>
+                            ` : ''}
                         </div>`;
-                    
-                    if(isDone) archiveCont.innerHTML += html;
-                    else activeCont.innerHTML += html;
+
+                    if (isDone) archiveList.innerHTML += taskHtml;
+                    else activeList.innerHTML += taskHtml;
                 });
             });
         });
-        
-        // עדכון פעילות (מקורי)
-        setDoc(doc(db, "activity", student + "_" + classCode), { name: student, classCode: classCode, lastSeen: serverTimestamp() }, { merge: true });
     }
 
-    // --- כל הפונקציות המקוריות מהקובץ שלך (ללא שינוי) ---
-
+    // פונקציות העלאה וניהול דפים המקוריות
     window.uploadWorksheet = (id) => {
         const inp = document.createElement('input');
-        inp.type = 'file'; inp.accept = 'image/*';
+        inp.type = 'file';
+        inp.accept = 'image/*';
         inp.onchange = async (e) => {
             const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = async (ev) => {
                 const b64 = ev.target.result;
-                await updateDoc(doc(db, "tasks", id), { worksheets: [b64], worksheetBy: student });
-                alert("הדפים הועלו!");
+                await updateDoc(doc(db, "tasks", id), { 
+                    worksheets: [b64], 
+                    worksheetBy: student 
+                });
+                alert("הדפים הועלו בהצלחה!");
             };
             reader.readAsDataURL(file);
         };
@@ -270,25 +269,50 @@
     window.viewWS = async (id) => {
         const d = await getDocs(collection(db, "tasks"));
         const t = d.docs.find(doc => doc.id === id).data();
-        document.getElementById('wsGrid').innerHTML = (t.worksheets || []).map(img => `<img src="${img}" style="width:100%; border-radius:15px; margin-bottom:10px;">`).join('');
+        document.getElementById('wsGrid').innerHTML = (t.worksheets || []).map(img => `
+            <img src="${img}" style="width:100%; border-radius:15px; margin-bottom:10px; border: 1px solid var(--glass-border);">
+        `).join('');
         document.getElementById('wsViewModal').style.display = 'block';
     };
 
-    window.deleteWS = async (id) => { if(confirm("למחוק דפים שלך?")) await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null }); };
-    
+    window.deleteWS = async (id) => {
+        if (confirm("האם למחוק את דפי העבודה שהעלית?")) {
+            await updateDoc(doc(db, "tasks", id), { worksheets: null, worksheetBy: null });
+        }
+    };
+
     window.toggleTask = async (tid, isDone) => {
         await setDoc(doc(db, "submissions", student + "_" + tid), { 
-            studentName: student, taskId: tid, completed: !isDone, classCode: classCode 
+            studentName: student, 
+            taskId: tid, 
+            completed: !isDone, 
+            classCode: classCode 
         });
     };
 
-    window.zoom = (url) => { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'block'; };
-    
-    window.logout = () => { localStorage.clear(); location.reload(); };
+    window.zoom = (url) => {
+        document.getElementById('modalImg').src = url;
+        document.getElementById('imgModal').style.display = 'block';
+    };
 
-    window.onload = () => { 
-        const n = localStorage.getItem('studentName'), c = localStorage.getItem('classCode');
-        if(n && c) {
+    window.logout = () => {
+        localStorage.clear();
+        location.reload();
+    };
+
+    function updateActivity() {
+        setDoc(doc(db, "activity", student + "_" + classCode), { 
+            name: student, 
+            classCode: classCode, 
+            lastSeen: serverTimestamp() 
+        }, { merge: true });
+    }
+
+    // טעינה אוטומטית
+    window.onload = () => {
+        const n = localStorage.getItem('studentName');
+        const c = localStorage.getItem('classCode');
+        if (n && c) {
             document.getElementById('studentName').value = n;
             document.getElementById('classCode').value = c;
             enterClass();
@@ -297,3 +321,4 @@
 </script>
 </body>
 </html>
+<body>
