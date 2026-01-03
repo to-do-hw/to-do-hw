@@ -308,14 +308,13 @@
         loadTasks();
     };
 
-    // --- טעינת משימות חכמה (ללא ריפרש) ---
+  // --- ניהול משימות חכמה וממוינת (ללא ריפרש) ---
     function loadTasks() {
-        console.log("מאזין למשימות של כיתה:", classCode);
+        console.log("מאזין למשימות של כיתה (ממוין):", classCode);
         
         const tQuery = query(collection(db, "tasks"), where("classCode", "==", classCode));
         const sQuery = query(collection(db, "submissions"), where("studentName", "==", student));
 
-        // האזנה לשינויים ב-Firebase
         onSnapshot(tQuery, (tSnap) => {
             onSnapshot(sQuery, (sSnap) => {
                 const doneIds = new Set();
@@ -324,15 +323,15 @@
                 const activeDiv = document.getElementById('activeTasks');
                 const archiveDiv = document.getElementById('archivedTasks');
                 
+                // איסוף משימות ומיון לפי זמן סיום (מהקרוב לרחוק)
                 let allTasks = [];
                 tSnap.forEach(d => allTasks.push({ id: d.id, ...d.data() }));
                 allTasks.sort((a, b) => a.endTime - b.endTime);
 
-                // מנגנון ניהול DOM ללא ריפרש
-                const currentElements = Array.from(activeDiv.children);
                 const activeIdsFromDb = allTasks.filter(t => !doneIds.has(t.id)).map(t => t.id);
+                const currentElements = Array.from(activeDiv.children);
 
-                // 1. הסרה של כרטיסיות שלא צריכות להיות כאן
+                // 1. הסרה של כרטיסיות שבוצעו או נמחקו (עם אנימציה)
                 currentElements.forEach(card => {
                     const tid = card.id.replace('card-', '');
                     if (!activeIdsFromDb.includes(tid) && !card.classList.contains('exit-anim')) {
@@ -340,6 +339,53 @@
                         setTimeout(() => card.remove(), 600);
                     }
                 });
+
+                // 2. הוספת משימות חדשות וסידור המיקום שלהן ב-DOM
+                allTasks.forEach((task) => {
+                    if (!doneIds.has(task.id)) {
+                        let taskCard = document.getElementById(`card-${task.id}`);
+                        
+                        if (!taskCard) {
+                            const date = new Date(task.endTime);
+                            const timeStr = date.toLocaleTimeString('he-IL', {hour: '2-digit', minute: '2-digit'});
+                            const dayName = daysArr[date.getDay()];
+
+                            const html = `
+                                <div id="card-${task.id}" class="glass-card entry-anim">
+                                    <div style="background:rgba(255,255,255,0.1); display:inline-block; padding:4px 10px; border-radius:8px; color:var(--primary); font-weight:800; font-size:12px; margin-bottom:10px;">יום ${dayName}</div>
+                                    <div style="font-size:26px; font-weight:800; line-height:1.2;">${task.title}</div>
+                                    <div style="color:var(--accent); font-weight:700; margin-bottom:15px;">להגשה עד: ${timeStr}</div>
+                                    ${task.imageUrl ? `<img src="${task.imageUrl}" class="task-img" onclick="openZoom('${task.imageUrl}')">` : ''}
+                                    <div style="display:flex; gap:12px; margin-top:20px;">
+                                        <button class="btn-action" style="flex:1;" onclick="finishTask('${task.id}')">סימנתי סיום ✅</button>
+                                        <button onclick="uploadWS('${task.id}')" style="width:60px; border-radius:18px; border:none; background:rgba(255,255,255,0.1); color:white; font-size:24px; cursor:pointer;">➕</button>
+                                    </div>
+                                </div>`;
+                            activeDiv.insertAdjacentHTML('beforeend', html);
+                            taskCard = document.getElementById(`card-${task.id}`);
+                        }
+                        
+                        // קריטי: דוחף את הכרטיסייה לסוף הרשימה לפי סדר המיון של הלולאה
+                        activeDiv.appendChild(taskCard);
+                    }
+                });
+
+                // 3. עדכון הארכיון
+                let arcHtml = "";
+                allTasks.forEach(task => {
+                    if (doneIds.has(task.id)) {
+                        arcHtml += `
+                            <div class="glass-card" style="padding:15px; margin-bottom:0; opacity:0.6;">
+                                <div style="font-weight:800; font-size:14px;">${task.title}</div>
+                                <div onclick="restoreTask('${task.id}')" style="color:var(--primary); cursor:pointer; font-weight:bold; margin-top:5px; font-size:12px;">החזר לרשימה ↑</div>
+                            </div>`;
+                    }
+                });
+                archiveDiv.innerHTML = arcHtml;
+                document.getElementById('archiveWrapper').classList.toggle('hidden', arcHtml === "");
+            });
+        });
+    }
 
                 // 2. הוספת משימות חדשות בלבד
                 allTasks.forEach(task => {
@@ -468,3 +514,4 @@
 </script>
 </body>
 </html>
+
